@@ -1,4 +1,4 @@
-package main
+package agency
 
 import (
 	"encoding/csv"

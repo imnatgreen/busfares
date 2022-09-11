@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/imnatgreen/busfares/internal/agency"
 )
 
 func main() {
@@ -23,8 +25,8 @@ func main() {
 	log.Print(aTest)
 }
 
-func loadAgencies(gtfsDir string) (agencies Agencies, err error) {
-	agencies = make(Agencies)
+func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {
+	agencies = make(agency.Agencies)
 
 	var gtfsFiles []string
 	err = filepath.WalkDir(gtfsDir, func(path string, d fs.DirEntry, err error) error {
