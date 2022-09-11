@@ -4,12 +4,14 @@ package main
 
 import (
 	"archive/zip"
+	"io"
 	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/imnatgreen/busfares/internal/agency"
+	"github.com/imnatgreen/busfares/internal/router"
 )
 
 func main() {
@@ -23,6 +25,18 @@ func main() {
 	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
 	aTest, _ := agencies.GetNoc("OP291")
 	log.Print(aTest)
+
+	// test router
+	json, _ := os.Open("internal/router/resp.json")
+	defer json.Close()
+	data, _ := io.ReadAll(json)
+	var res router.TripPlannerResponse
+	res, err := router.ParseJson(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print(res)
+	log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
 }
 
 func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {

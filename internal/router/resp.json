@@ -1,0 +1,570 @@
+{
+  "requestParameters": {
+    "date": "09-03-2022",
+    "mode": "TRANSIT,WALK",
+    "arriveBy": "false",
+    "wheelchair": "false",
+    "debugItineraryFilter": "false",
+    "showIntermediateStops": "true",
+    "fromPlace": "53.728747016916195,-2.238743305206299",
+    "toPlace": "53.69445776852505,-2.2513604164123535",
+    "time": "3:11pm",
+    "maxWalkDistance": "4828.032",
+    "locale": "en"
+  },
+  "plan": {
+    "date": 1662214260000,
+    "from": {
+      "name": "Origin",
+      "lon": -2.238743305206299,
+      "lat": 53.728747016916195,
+      "vertexType": "NORMAL"
+    },
+    "to": {
+      "name": "Destination",
+      "lon": -2.2513604164123535,
+      "lat": 53.69445776852505,
+      "vertexType": "NORMAL"
+    },
+    "itineraries": [
+      {
+        "duration": 3540,
+        "startTime": 1662214260000,
+        "endTime": 1662217800000,
+        "walkTime": 3540,
+        "transitTime": 0,
+        "waitingTime": 0,
+        "walkDistance": 4457.963,
+        "walkLimitExceeded": false,
+        "generalizedCost": 6791,
+        "elevationLost": 77.48000000000008,
+        "elevationGained": 41.720000000000084,
+        "transfers": 0,
+        "fare": {
+          "fare": {},
+          "details": {}
+        },
+        "legs": [
+          {
+            "startTime": 1662214260000,
+            "endTime": 1662217800000,
+            "departureDelay": 0,
+            "arrivalDelay": 0,
+            "realTime": false,
+            "distance": 4457.963,
+            "generalizedCost": 6791,
+            "pathway": false,
+            "mode": "WALK",
+            "transitLeg": false,
+            "route": "",
+            "agencyTimeZoneOffset": 3600000,
+            "interlineWithPreviousLeg": false,
+            "from": {
+              "name": "Origin",
+              "lon": -2.238743305206299,
+              "lat": 53.728747016916195,
+              "departure": 1662214260000,
+              "vertexType": "NORMAL"
+            },
+            "to": {
+              "name": "Destination",
+              "lon": -2.2513604164123535,
+              "lat": 53.69445776852505,
+              "arrival": 1662217800000,
+              "vertexType": "NORMAL"
+            },
+            "legGeometry": {
+              "points": "q{|fIbgtLPhAf@fCVvAJz@AJCXQvBFDTFPJRNz@n@DBTR`@\\ZTj@f@nAbAb@^VRPL@BDBBB@@fAt@VP\\Rn@^^RZRbB|@D@JH@?FDHDDBh@Zb@T^R^NZLTHNFPFxAn@PHRHnAp@x@`@NF@@lCnA@@LFJFHDdAf@VHfA`@FBJFHFFHFHFNJZFZFb@J~@Fp@Hh@J`@FLFRJPJPNRVRlAb@n@T|BbA^P\\PVB^A^K^Qb@UHENA\\EZ?\\Fb@LHFv@f@DB\\VXXFHLPLTr@fBP^DJRb@JLDBBDLHVFL@RDr@?HANHFCB?LCHALCTCJEhAYVEpAUNC`AWHA|A_@ZG@AZEDA\\GBA\\IbB]VEvBm@D?r@O@AVGf@MNEhBk@LEPEPC??j@OTMVS@Al@g@PO~@s@p@Uh@Ij@I\\AD@H@PPb@Rr@`@`@RL?BGTVXZDDLRDFFHDF\\d@FHPXNRf@l@VTVTXPVP^Nb@NJBPFF@^Jh@Jb@DX@RCp@Ip@Qj@M\\M^QXSBALKLKDEl@eABALQDGb@q@Va@PYDI~@cBzAyBj@c@DGVM`@B^G~@OdAMbAI^CVBl@VVPfApA|AjCv@zAPh@J\\@BZ`AJ^BHRr@f@`BPh@FPVp@P\\RXNPRNZRNq@FWf@yB",
+              "length": 253
+            },
+            "steps": [
+              {
+                "distance": 182.80599999999998,
+                "relativeDirection": "DEPART",
+                "streetName": "Dean Lane",
+                "absoluteDirection": "SOUTHWEST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2387366878282413,
+                "lat": 53.728738316888965,
+                "elevation": "0,267.8,10,267.6,20,267.1,30,266.1,40,265.0,50,264.3,60,264.8,70,265.2,76,265.4,152,265.1,162,264.6,172,264.1,182,263.7,192,263.6,205,263.3,205,263.3,209,263.1,209,263.1,218,262.6,218,262.6,228,262.1,238,261.7,248,261.6,259,261.5",
+                "walkingBike": false
+              },
+              {
+                "distance": 2702.053000000001,
+                "relativeDirection": "LEFT",
+                "streetName": "Burnley Road East",
+                "absoluteDirection": "SOUTH",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2413191,
+                "lat": 53.7283831,
+                "elevation": "0,261.5,4,261.5,4,261.5,14,261.4,24,261.1,34,260.8,41,260.6,41,260.6,51,260.1,61,259.5,71,259.0,81,258.9,161,258.2,171,257.4,181,257.7,191,258.4,201,258.9,211,259.3,221,259.5,234,259.3,234,259.3,244,258.8,254,258.2,259,257.8,259,257.8,260,257.7,327,257.8,337,258.0,344,257.8,344,257.8,354,257.5,364,257.2,373,256.8,373,256.8,383,256.4,392,256.1,392,256.1,402,255.8,409,255.6,491,253.1,501,252.6,511,252.7,521,252.9,531,253.1,541,253.5,551,254.0,561,254.1,571,254.1,581,254.2,594,254.2,594,254.2,607,254.3,607,254.3,617,254.6,627,254.8,637,254.9,647,255.0,657,255.2,667,255.6,679,256.2,679,256.2,689,256.6,689,256.6,701,257.2,701,257.2,711,257.8,721,258.9,731,259.8,741,260.3,751,260.6,761,260.7,771,259.9,783,259.0,877,251.4,878,251.3,878,251.3,886,251.1,886,251.1,893,251.1,893,251.1,900,251.0,900,251.0,910,251.0,920,250.9,930,250.5,940,250.1,954,249.6,954,249.6,964,249.2,974,249.0,984,249.1,994,249.0,1004,248.7,1014,248.2,1024,247.2,1034,247.8,1043,248.6,1263,237.8,1273,238.2,1283,238.4,1293,238.4,1303,238.2,1313,238.4,1323,239.4,1333,240.2,1343,240.8,1353,241.1,1363,241.2,1373,240.3,1383,239.6,1393,239.1,1403,238.5,1413,238.1,1423,238.5,1433,238.8,1443,239.1,1453,239.2,1463,239.2,1469,238.9,1469,238.9,1479,238.1,1489,237.3,1499,236.5,1509,235.7,1519,235.6,1529,236.6,1539,237.4,1553,238.2,1553,238.2,1563,238.4,1573,238.3,1583,237.9,1591,237.3,1591,237.3,1601,236.1,1611,234.4,1621,234.1,1631,235.7,1631,235.7,1641,237.5,1651,238.4,1661,238.3,1671,237.6,1681,236.2,1691,235.3,1701,236.1,1711,236.8,1711,236.8,1721,237.0,1731,236.5,1740,235.8,1740,235.8,1747,235.2,1747,235.2,1756,234.3,1756,234.3,1769,233.6,1769,233.6,1777,233.3,1777,233.3,1787,233.4,1797,233.6,1807,233.8,1817,233.5,1832,232.5,1846,231.7,1852,231.4,1852,231.4,1862,230.9,1872,231.3,1922,232.8,1932,232.5,1942,232.0,1952,231.4,1962,230.7,1972,230.4,1982,230.1,1990,229.8,1990,229.8,2000,229.5,2010,229.1,2020,228.8,2027,228.6,2102,226.9,2104,226.8,2104,226.8,2114,226.7,2119,226.5,2119,226.5,2123,226.4,2123,226.4,2133,226.1,2139,225.9,2139,225.9,2142,225.8,2142,225.8,2152,225.7,2159,225.6,2159,225.6,2169,225.5,2179,225.5,2189,225.4,2199,225.2,2209,225.0,2215,224.8,2215,224.8,2228,224.5,2228,224.5,2238,224.2,2248,223.9,2258,223.6,2268,223.3,2278,223.3,2288,223.3,2297,223.3,2367,222.8,2376,222.8,2376,222.8,2386,222.8,2396,222.9,2406,223.2,2416,223.8,2426,224.3,2436,224.5,2445,224.7,2445,224.7,2455,224.8,2548,223.9,2558,223.8,2568,223.9,2578,224.0,2588,224.1,2598,224.0,2608,223.7,2618,223.4,2628,223.1,2628,223.1,2638,223.1,2648,223.8,2658,224.6,2668,225.4,2678,226.1,2688,226.6,2696,226.7,2696,226.7,2702,226.7",
+                "walkingBike": false
+              },
+              {
+                "distance": 94.458,
+                "relativeDirection": "SLIGHTLY_RIGHT",
+                "streetName": "road",
+                "absoluteDirection": "SOUTHWEST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": true,
+                "lon": -2.2487119,
+                "lat": 53.70616020000001,
+                "elevation": "0,226.7,10,225.5,20,224.6,30,223.8,40,222.5,50,221.1,60,219.9,70,218.9,80,218.2,94,217.9",
+                "walkingBike": false
+              },
+              {
+                "distance": 1404.636,
+                "relativeDirection": "RIGHT",
+                "streetName": "Burnley Road East",
+                "absoluteDirection": "SOUTHWEST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2491358000000004,
+                "lat": 53.705372600000004,
+                "elevation": "0,217.9,14,216.9,14,216.9,24,216.1,36,215.2,36,215.2,46,214.3,56,213.7,59,213.4,86,212.7,99,212.9,99,212.9,109,213.0,119,213.0,129,213.3,137,213.4,137,213.4,147,213.4,157,213.4,167,213.2,177,213.0,187,212.7,197,212.6,207,212.4,217,212.2,227,212.0,237,211.5,237,211.5,244,211.2,321,207.1,331,206.5,341,206.6,351,206.7,361,206.8,371,206.8,381,206.7,391,206.8,401,206.8,411,206.8,421,206.7,431,206.7,445,206.5,445,206.5,455,206.3,463,206.1,463,206.1,473,205.8,480,205.6,480,205.6,491,205.7,491,205.7,500,205.9,539,205.7,550,205.6,550,205.6,554,205.8,554,205.8,564,206.1,574,206.4,580,206.6,580,206.6,590,206.7,597,206.6,597,206.6,607,206.5,615,206.2,1044,200.6,1054,200.4,1064,200.7,1074,201.1,1084,201.1,1094,200.7,1104,200.0,1114,198.9,1124,198.9,1134,199.0,1144,199.2,1154,199.4,1164,200.0,1175,200.7,1175,200.7,1187,201.0,1215,200.1,1228,199.6,1228,199.6,1238,199.1,1252,198.3,1252,198.3,1262,197.7,1272,197.1,1282,196.5,1291,195.9,1291,195.9,1301,195.6,1311,195.7,1321,195.6,1331,195.3,1341,194.8,1351,194.1,1361,193.0,1371,192.3,1381,193.3,1391,194.1,1405,194.6",
+                "walkingBike": false
+              },
+              {
+                "distance": 74.01,
+                "relativeDirection": "LEFT",
+                "streetName": "Thornfield Avenue",
+                "absoluteDirection": "SOUTHEAST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2523382,
+                "lat": 53.6947862,
+                "elevation": "0,194.6,10,194.6,19,194.8,19,194.8,28,195.2,28,195.2,38,195.4,48,195.3,58,195.2,68,195.1,74,195.4",
+                "walkingBike": false
+              }
+            ],
+            "rentedBike": false,
+            "walkingBike": false,
+            "duration": 3540
+          }
+        ],
+        "tooSloped": false,
+        "arrivedAtDestinationWithRentedBicycle": false
+      },
+      {
+        "duration": 838,
+        "startTime": 1662216441000,
+        "endTime": 1662217279000,
+        "walkTime": 270,
+        "transitTime": 568,
+        "waitingTime": 0,
+        "walkDistance": 331.743,
+        "walkLimitExceeded": false,
+        "generalizedCost": 1677,
+        "elevationLost": 0,
+        "elevationGained": 0,
+        "transfers": 0,
+        "legs": [
+          {
+            "startTime": 1662216441000,
+            "endTime": 1662216600000,
+            "departureDelay": 0,
+            "arrivalDelay": 0,
+            "realTime": false,
+            "distance": 204.572,
+            "generalizedCost": 302,
+            "pathway": false,
+            "mode": "WALK",
+            "transitLeg": false,
+            "route": "",
+            "agencyTimeZoneOffset": 3600000,
+            "interlineWithPreviousLeg": false,
+            "from": {
+              "name": "Origin",
+              "lon": -2.238743305206299,
+              "lat": 53.728747016916195,
+              "departure": 1662216441000,
+              "vertexType": "NORMAL"
+            },
+            "to": {
+              "name": "Dean Lane",
+              "stopId": "2:25001425",
+              "stopCode": "lanampag",
+              "lon": -2.241137,
+              "lat": 53.728558,
+              "arrival": 1662216600000,
+              "departure": 1662216600000,
+              "vertexType": "TRANSIT"
+            },
+            "legGeometry": {
+              "points": "q{|fIbgtLPhAf@fCVvAJz@AJCXQvBc@Q?A??@O",
+              "length": 12
+            },
+            "steps": [
+              {
+                "distance": 182.80599999999998,
+                "relativeDirection": "DEPART",
+                "streetName": "Dean Lane",
+                "absoluteDirection": "SOUTHWEST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2387366878282413,
+                "lat": 53.728738316888965,
+                "elevation": "0,267.8,10,267.6,20,267.1,30,266.1,40,265.0,50,264.3,60,264.8,70,265.2,76,265.4,152,265.1,162,264.6,172,264.1,182,263.7,192,263.6,205,263.3,205,263.3,209,263.1,209,263.1,218,262.6,218,262.6,228,262.1,238,261.7,248,261.6,259,261.5",
+                "walkingBike": false
+              },
+              {
+                "distance": 21.766000000000002,
+                "relativeDirection": "RIGHT",
+                "streetName": "Burnley Road East",
+                "absoluteDirection": "NORTH",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2413191,
+                "lat": 53.7283831,
+                "elevation": "",
+                "walkingBike": false
+              }
+            ],
+            "rentedBike": false,
+            "walkingBike": false,
+            "duration": 159
+          },
+          {
+            "startTime": 1662216600000,
+            "endTime": 1662217168000,
+            "departureDelay": 0,
+            "arrivalDelay": 0,
+            "realTime": false,
+            "distance": 4271.304729615677,
+            "generalizedCost": 1168,
+            "pathway": false,
+            "mode": "BUS",
+            "transitLeg": true,
+            "agencyName": "Rosso",
+            "agencyUrl": "https://www.traveline.info",
+            "agencyTimeZoneOffset": 3600000,
+            "routeType": 3,
+            "routeId": "2:19333",
+            "interlineWithPreviousLeg": false,
+            "tripBlockId": "8257befff447370549ed43b561a3bbc57bf0e037",
+            "headsign": "Bury",
+            "agencyId": "2:OP291",
+            "tripId": "2:VJe6d12cceb251b80d651942a576d36b60944332c4",
+            "serviceDate": "2022-09-03",
+            "from": {
+              "name": "Dean Lane",
+              "stopId": "2:25001425",
+              "stopCode": "lanampag",
+              "lon": -2.241137,
+              "lat": 53.728558,
+              "arrival": 1662216600000,
+              "departure": 1662216600000,
+              "stopIndex": 15,
+              "stopSequence": 15,
+              "vertexType": "TRANSIT"
+            },
+            "to": {
+              "name": "Post Office",
+              "stopId": "2:2500IMG2914",
+              "stopCode": "langjgjm",
+              "lon": -2.252435,
+              "lat": 53.694309,
+              "arrival": 1662217168000,
+              "departure": 1662217168000,
+              "stopIndex": 31,
+              "stopSequence": 31,
+              "vertexType": "TRANSIT"
+            },
+            "intermediateStops": [
+              {
+                "name": "County Primary School",
+                "stopId": "2:2500LAA15761",
+                "stopCode": "lanjtdpm",
+                "lon": -2.241979,
+                "lat": 53.727417,
+                "arrival": 1662216619000,
+                "departure": 1662216619000,
+                "stopIndex": 16,
+                "stopSequence": 16,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Lower House Green",
+                "stopId": "2:2500LAA07114",
+                "stopCode": "langwmpw",
+                "lon": -2.243002,
+                "lat": 53.726227,
+                "arrival": 1662216640000,
+                "departure": 1662216640000,
+                "stopIndex": 17,
+                "stopSequence": 17,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Forest Holme Close",
+                "stopId": "2:2500LAA07111",
+                "stopCode": "langwmpj",
+                "lon": -2.24422,
+                "lat": 53.724518,
+                "arrival": 1662216668000,
+                "departure": 1662216668000,
+                "stopIndex": 18,
+                "stopSequence": 18,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Peers Clough Road",
+                "stopId": "2:2500LAA07109",
+                "stopCode": "langwmpd",
+                "lon": -2.245704,
+                "lat": 53.721764,
+                "arrival": 1662216712000,
+                "departure": 1662216712000,
+                "stopIndex": 19,
+                "stopSequence": 19,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Hargreaves Arms",
+                "stopId": "2:2500LAA07107",
+                "stopCode": "langwmjw",
+                "lon": -2.248433,
+                "lat": 53.719341,
+                "arrival": 1662216757000,
+                "departure": 1662216757000,
+                "stopIndex": 20,
+                "stopSequence": 20,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Lower Holme",
+                "stopId": "2:2500LAA07106",
+                "stopCode": "langwmjt",
+                "lon": -2.249534,
+                "lat": 53.715858,
+                "arrival": 1662216811000,
+                "departure": 1662216811000,
+                "stopIndex": 21,
+                "stopSequence": 21,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Albert Street",
+                "stopId": "2:2500LAA07102",
+                "stopCode": "langwmjg",
+                "lon": -2.251352,
+                "lat": 53.713356,
+                "arrival": 1662216853000,
+                "departure": 1662216853000,
+                "stopIndex": 22,
+                "stopSequence": 22,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "West View Road",
+                "stopId": "2:2500LAA07100",
+                "stopCode": "langwmja",
+                "lon": -2.25075,
+                "lat": 53.711525,
+                "arrival": 1662216882000,
+                "departure": 1662216882000,
+                "stopIndex": 23,
+                "stopSequence": 23,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Community Centre",
+                "stopId": "2:2500IMG2919",
+                "stopCode": "langjgmd",
+                "lon": -2.250133,
+                "lat": 53.709637,
+                "arrival": 1662216911000,
+                "departure": 1662216911000,
+                "stopIndex": 24,
+                "stopSequence": 24,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Foxhill Drive",
+                "stopId": "2:2500LAA07098",
+                "stopCode": "langwmgt",
+                "lon": -2.24964,
+                "lat": 53.708183,
+                "arrival": 1662216934000,
+                "departure": 1662216934000,
+                "stopIndex": 25,
+                "stopSequence": 25,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "The Roebuck",
+                "stopId": "2:2500IMG2917",
+                "stopCode": "langjgjw",
+                "lon": -2.249515,
+                "lat": 53.704983,
+                "arrival": 1662216983000,
+                "departure": 1662216983000,
+                "stopIndex": 26,
+                "stopSequence": 26,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Ashworth Road",
+                "stopId": "2:2500IMG2916",
+                "stopCode": "langjgjt",
+                "lon": -2.250898,
+                "lat": 53.703346,
+                "arrival": 1662217011000,
+                "departure": 1662217011000,
+                "stopIndex": 27,
+                "stopSequence": 27,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Bridleway",
+                "stopId": "2:2500LAA15762",
+                "stopCode": "lanjtdpt",
+                "lon": -2.250097,
+                "lat": 53.701019,
+                "arrival": 1662217047000,
+                "departure": 1662217047000,
+                "stopIndex": 28,
+                "stopSequence": 28,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Masons Arms",
+                "stopId": "2:250014491",
+                "stopCode": "lanamtma",
+                "lon": -2.247904,
+                "lat": 53.698982,
+                "arrival": 1662217084000,
+                "departure": 1662217084000,
+                "stopIndex": 29,
+                "stopSequence": 29,
+                "vertexType": "TRANSIT"
+              },
+              {
+                "name": "Turnpike Road",
+                "stopId": "2:2500LAA07096",
+                "stopCode": "langwmgm",
+                "lon": -2.249901,
+                "lat": 53.69603,
+                "arrival": 1662217133000,
+                "departure": 1662217133000,
+                "stopIndex": 30,
+                "stopSequence": 30,
+                "vertexType": "TRANSIT"
+              }
+            ],
+            "legGeometry": {
+              "points": "oz|fIrvtL??@@b@PZLPJTNx@n@DBTR`@\\??@@XRzBjBb@^VRRP??DB??@@BBdAt@XP\\Rn@^^RZRbB|@B@??B@HF@?PJDBh@Zb@T^R^NZLTHNFPH~B`AnAp@z@`@LF??B@lCpALFJFHDdAf@VHfA`@FBJFHFFHFHHNDNJf@Fb@J~@Fp@Hh@J`@FL???@FPVb@NRVRlAb@n@TzBbA`@P\\PVB^A^K^Qb@UHENAZE\\?\\F`@LJF??@@t@d@`@ZZXTZLTv@fBXn@P\\HJHF??NHRDd@Fn@FHAJ?@?VGJADA\\IJA??@AhAS??HCLCnAWPC`ASfB_@??@?VGDA\\Gb@K^K`B[TIvBe@FC??@Ar@Sz@SNElBc@LEb@I?A??@?h@OTKXUl@g@PO~@s@p@Uh@Ij@I\\ANB~@NPHd@Vd@`@RRZ^DDLRDF??@@DFDFd@n@PXNRf@l@VTVTZPTP^Nb@NJBPFF@??@?\\Jh@Jb@DX@PCr@Ip@Qj@M\\M^QXSDAXYDCl@eA??@A@?LSf@}@T_@Va@@A`A_BzAyBp@k@VMd@EZC??@?|@IdAMbAI^CVBl@VVPfApA|AjCv@zAPh@L`@???@Z~@Nh@Rr@f@`BPh@FPVp@N\\TXNPRNZR`@Nv@NB@",
+              "length": 251
+            },
+            "steps": [],
+            "routeShortName": "483",
+            "duration": 568
+          },
+          {
+            "startTime": 1662217168000,
+            "endTime": 1662217279000,
+            "departureDelay": 0,
+            "arrivalDelay": 0,
+            "realTime": false,
+            "distance": 127.171,
+            "generalizedCost": 206,
+            "pathway": false,
+            "mode": "WALK",
+            "transitLeg": false,
+            "route": "",
+            "agencyTimeZoneOffset": 3600000,
+            "interlineWithPreviousLeg": false,
+            "from": {
+              "name": "Post Office",
+              "stopId": "2:2500IMG2914",
+              "stopCode": "langjgjm",
+              "lon": -2.252435,
+              "lat": 53.694309,
+              "arrival": 1662217168000,
+              "departure": 1662217168000,
+              "vertexType": "TRANSIT"
+            },
+            "to": {
+              "name": "Destination",
+              "lon": -2.2513604164123535,
+              "lat": 53.69445776852505,
+              "arrival": 1662217279000,
+              "vertexType": "NORMAL"
+            },
+            "legGeometry": {
+              "points": "kdvfIv|vLALCAa@IUEa@ONq@FWf@yB",
+              "length": 9
+            },
+            "steps": [
+              {
+                "distance": 53.161,
+                "relativeDirection": "DEPART",
+                "streetName": "Burnley Road East",
+                "absoluteDirection": "NORTH",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.252506325369724,
+                "lat": 53.69431890777863,
+                "elevation": "4,193.7,14,194.0,23,194.3,23,194.3,33,194.7,43,194.8,55,194.6",
+                "walkingBike": false
+              },
+              {
+                "distance": 74.01,
+                "relativeDirection": "RIGHT",
+                "streetName": "Thornfield Avenue",
+                "absoluteDirection": "SOUTHEAST",
+                "stayOn": false,
+                "area": false,
+                "bogusName": false,
+                "lon": -2.2523382,
+                "lat": 53.6947862,
+                "elevation": "0,194.6,10,194.6,19,194.8,19,194.8,28,195.2,28,195.2,38,195.4,48,195.3,58,195.2,68,195.1,74,195.4",
+                "walkingBike": false
+              }
+            ],
+            "rentedBike": false,
+            "walkingBike": false,
+            "duration": 111
+          }
+        ],
+        "tooSloped": false,
+        "arrivedAtDestinationWithRentedBicycle": false
+      }
+    ]
+  },
+  "metadata": {
+    "searchWindowUsed": 3000,
+    "nextDateTime": 1662217260000,
+    "prevDateTime": 1662211260000
+  },
+  "previousPageCursor": "rO0ABXc1AQANUFJFVklPVVNfUEFHRQUHV5yAAAAAAAAn2AAXU1RSRUVUX0FORF9BUlJJVkFMX1RJTUU=",
+  "nextPageCursor": "rO0ABXcxAQAJTkVYVF9QQUdFBQeLLIAAAAAAACfYABdTVFJFRVRfQU5EX0FSUklWQUxfVElNRQ==",
+  "debugOutput": {
+    "precalculationTime": 129520,
+    "directStreetRouterTime": 9197053,
+    "transitRouterTime": 1608413728,
+    "filteringTime": 942285,
+    "renderingTime": 2014332,
+    "totalTime": 1620872240,
+    "transitRouterTimes": {
+      "tripPatternFilterTime": 286956777,
+      "accessEgressTime": 25665708,
+      "raptorSearchTime": 1288780562,
+      "itineraryCreationTime": 7002640
+    }
+  },
+  "elevationMetadata": {
+    "ellipsoidToGeoidDifference": 51.56251272209011,
+    "geoidElevation": false
+  }
+}
