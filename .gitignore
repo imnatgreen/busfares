@@ -13,3 +13,13 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Local testing files & dirs
+6236
+6236.zip
+gtfs
+ROST_*.xml
+
+# Local env
+.env
+.vscode/launch.json
