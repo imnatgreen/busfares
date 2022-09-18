@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/imnatgreen/busfares/internal/agency"
+	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/imnatgreen/busfares/internal/router"
 )
 
@@ -37,6 +38,17 @@ func main() {
 	}
 	log.Print(res)
 	log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
+
+	// test fares
+	xml, _ := os.Open("internal/fares/ROST_483_Outbound_Single_.xml")
+	defer json.Close()
+	xmlData, _ := io.ReadAll(xml)
+	var xmlRes fares.FareObject
+	xmlRes, err = fares.ParseXml(xmlData)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print(xmlRes)
 }
 
 func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {
