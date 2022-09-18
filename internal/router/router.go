@@ -46,3 +46,15 @@ func ParseJson(data []byte) (TripPlannerResponse, error) {
 	err := json.Unmarshal(data, &response)
 	return response, err
 }
+
+func FilterTransitLegs(response TripPlannerResponse) []leg {
+	var transitLegs []leg
+	for _, itinerary := range response.Plan.Itineraries {
+		for _, leg := range itinerary.Legs {
+			if leg.TransitLeg {
+				transitLegs = append(transitLegs, leg)
+			}
+		}
+	}
+	return transitLegs
+}
