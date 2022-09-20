@@ -14,6 +14,7 @@ type FareObject struct {
 	XMLName      xml.Name             `xml:"PublicationDelivery"`
 	References   FareObjectReferences `xml:"PublicationRequest>topics>NetworkFrameTopic>NetworkFilterByValue>objectReferences"`
 	ServiceFrame ServiceFrame         `xml:"dataObjects>CompositeFrame>frames>ServiceFrame"`
+	FareFrame    FareFrame            `xml:"dataObjects>CompositeFrame>frames>FareFrame"`
 }
 
 type FareObjectReferences struct {
@@ -46,6 +47,23 @@ type ScheduledStopPoint struct {
 type TopographicPlaceView struct {
 	TopographicPlaceViewRef AttrRef `xml:"TopographicPlaceRef"`
 	Name                    string  `xml:"Name"`
+}
+
+type FareFrame struct {
+	ResponsibilitySetRef string     `xml:"responsibilitySetRef,attr"`
+	TypeOfFrameRef       AttrRef    `xml:"TypeOfFrameRef"`
+	FareZones            []FareZone `xml:"fareZones>FareZone"`
+}
+
+type FareZone struct {
+	Id      string                  `xml:"id,attr"`
+	Name    string                  `xml:"Name"`
+	Members []ScheduledStopPointRef `xml:"members>ScheduledStopPointRef"`
+}
+
+type ScheduledStopPointRef struct {
+	Ref  string `xml:"ref,attr"`
+	Name string `xml:",chardata"`
 }
 
 // Breakdown of Transdev single fare xml structure:
