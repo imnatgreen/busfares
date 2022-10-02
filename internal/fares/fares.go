@@ -4,12 +4,12 @@ import (
 	"encoding/xml"
 	"time"
 
+	"github.com/bojanz/currency"
 	"github.com/imnatgreen/busfares/internal/agency"
 )
 
 type Noc = agency.Noc
 type Naptan string
-type Fare int
 
 type XmlTime struct {
 	time.Time
@@ -29,6 +29,7 @@ func (x *XmlTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 type FareObject struct {
 	XMLName             xml.Name                 `xml:"PublicationDelivery"`
 	References          FareObjectReferences     `xml:"PublicationRequest>topics>NetworkFrameTopic>NetworkFilterByValue>objectReferences"`
+	Currency            string                   `xml:"dataObjects>CompositeFrame>FrameDefaults>DefaultCurrency"`
 	Operators           []Operator               `xml:"dataObjects>CompositeFrame>frames>ResourceFrame>organisations>Operator"`
 	Lines               []Line                   `xml:"dataObjects>CompositeFrame>frames>ServiceFrame>lines>Line"`
 	ScheduledStopPoints []ScheduledStopPoint     `xml:"dataObjects>CompositeFrame>frames>ServiceFrame>scheduledStopPoints>ScheduledStopPoint"`
@@ -104,21 +105,39 @@ type PriceGroup struct {
 }
 
 type GeographicalIntervalPrice struct {
-	Id     string  `xml:"id,attr"`
-	Amount float32 `xml:"Amount"`
+	Id     string `xml:"id,attr"`
+	Amount string `xml:"Amount"`
 }
 
 type FareTable struct {
-	TariffRef                 AttrRef `xml:"usedIn>TariffRef"`
-	UserProfileRef            AttrRef `xml:"pricesFor>UserProfileRef"`
-	SalesOfferPackageRef      AttrRef `xml:"pricesFor>SalesOfferPackageRef"`
-	PreassignedFareProductRef AttrRef `xml:"pricesFor>PreassignedFareProductRef"`
+	TariffRef                 AttrRef              `xml:"usedIn>TariffRef"`
+	UserProfileRef            AttrRef              `xml:"pricesFor>UserProfileRef"`
+	SalesOfferPackageRef      AttrRef              `xml:"pricesFor>SalesOfferPackageRef"`
+	PreassignedFareProductRef AttrRef              `xml:"pricesFor>PreassignedFareProductRef"`
+	Columns                   []FareTableRowColumn `xml:"columns>FareTableColumn"`
+	Rows                      []FareTableRowColumn `xml:"rows>FareTableRow"`
+	Cells                     []FareTableCell      `xml:"includes>FareTable>cells>Cell"`
 }
 
-// type ServiceFrame struct {
-// 	Lines               []Line               `xml:"lines>Line"`
-// 	ScheduledStopPoints []ScheduledStopPoint `xml:"scheduledStopPoints>ScheduledStopPoint"`
-// }
+type FareTableRowColumn struct {
+	Id           string    `xml:"id,attr"`
+	Order        string    `xml:"order,attr"`
+	Name         string    `xml:"Name"`
+	FareZoneRefs []AttrRef `xml:"representing>FareZoneRef"` // only in columns
+}
+
+type FareTableCell struct {
+	Id                         string                     `xml:"id,attr"`
+	DistanceMatrixElementPrice DistanceMatrixElementPrice `xml:"DistanceMatrixElementPrice"`
+	ColumnRef                  AttrRef                    `xml:"ColumnRef"`
+	RowRef                     AttrRef                    `xml:"RowRef"`
+}
+
+type DistanceMatrixElementPrice struct {
+	Id                           string  `xml:"id,attr"`
+	GeographicalIntervalPriceRef AttrRef `xml:"GeographicalIntervalPriceRef"`
+	DistanceMatrixElementRef     AttrRef `xml:"DistanceMatrixElementRef"`
+}
 
 type Line struct {
 	LineRef     string  `xml:"id,attr"`
@@ -138,24 +157,6 @@ type TopographicPlaceView struct {
 	Name                    string  `xml:"Name"`
 }
 
-// type FareFrame struct {
-// 	// Frame 1
-// 	// ResponsibilitySetRef string     `xml:"responsibilitySetRef,attr"`
-// 	// TypeOfFrameRef       AttrRef    `xml:"TypeOfFrameRef"`
-// 	FareZones            []FareZone `xml:"fareZones>FareZone"`
-// 	// Frame 2
-// 	Tarrifs            []Tarrif                 `xml:"tarrifs>Tarrif"`
-// 	UsageParameters    []UserProfile            `xml:"usageParameters>UserProfile"`
-// 	FareProducts       []PreassignedFareProduct `xml:"fareProducts>PreassignedFareProduct"`
-// 	SalesOfferPackages []SalesOfferPackage      `xml:"salesOfferPackages>SalesOfferPackage"`
-// 	// Frame 3
-//   PriceGroups []PriceGroup `xml:"priceGroups>PriceGroup"`
-// 	FareTables  []FareTable  `xml:"fareTables>FareTable"`
-// }
-
-// https://github.com/jclgoodwin/bustimes.org/blob/main/fares/management/commands/import_netex_fares.py
-// https://github.com/antchfx/xmlquery
-
 type FareZone struct {
 	Id      string                  `xml:"id,attr"`
 	Name    string                  `xml:"Name"`
@@ -167,34 +168,6 @@ type ScheduledStopPointRef struct {
 	Name string `xml:",chardata"`
 }
 
-//    TODO>-FareFrame(responsibilitySetRef="tarrifs")>-tarrifs
-// 																									 >-usageParameters
-// 					  																			 >-fareProducts
-// 																									 >-salesOfferPackages
-// 		TODO>-FareFrame(responsibilitySetRef="tarrifs")>-priceGroups
-// 				                                           >-fareTables
-
-// Breakdown of Transdev single fare xml structure:
-// 	CompositeFrame(resoponsibilitySetRef="tarrifs")>frames>-ServiceFrame>-lines>Line(id)>-PublicCode
-// 																																											>-PrivateCode
-// 																																											>-OperatorRef
-// 																																			>-scheduledStopPoints>-ScheduledStopPoint(id)>-Name
-// 																																																									 >-TopographicPlaceView>-TopographicPlaceViewRef(ref)
-// 																																																																				 >-Name
-
-// 																										TODO>-FareFrame(responsibilitySetRef="network_data")>fareZones>FareZone(id)>-Name
-// 																												                                                                       >-members>ScheduledStopPointRef(ref)
-// 																										TODO>-FareFrame(responsibilitySetRef="tarrifs")>-tarrifs
-// 																																																	 >-usageParameters
-// 																																																	 >-fareProducts
-// 																																																	 >-salesOfferPackages
-// 																										TODO>-FareFrame(responsibilitySetRef="tarrifs")>-priceGroups
-// 																												                                           >-fareTables
-
-// potential api for live vehicle data?
-// https://www.transdevbus.co.uk/_ajax/vehicles
-// https://www.transdevbus.co.uk/_ajax/stops/2500LAA15762/vehicles
-
 func ParseFares() {
 	// TODO
 }
@@ -205,7 +178,49 @@ func ParseXml(data []byte) (FareObject, error) {
 	return obj, err
 }
 
-func GetFareFromFareObject(fareObject FareObject, noc Noc, from Naptan, to Naptan) (Fare, error) {
-	// TODO
-	return 0, nil
+func (f FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) {
+	// get fare zones from stops
+	fromRef := string("atco:" + from)
+	toRef := string("atco:" + to)
+	var fromZone, toZone string
+	for _, fareZone := range f.FareZones {
+		for _, member := range fareZone.Members {
+			if member.Ref == fromRef {
+				fromZone = fareZone.Id
+				break
+			}
+			if member.Ref == toRef {
+				toZone = fareZone.Id
+				break
+			}
+		}
+	}
+
+	// get distance matrix element id from fare zones
+	var distanceMatrixElementId string
+	for _, d := range f.Tariffs[0].DistanceMatrixElements {
+		if d.StartTariffZoneRef.Ref == fromZone && d.EndTariffZoneRef.Ref == toZone {
+			distanceMatrixElementId = d.Id
+			break
+		}
+	}
+
+	// get price group id from distance matrix element id
+	var geographicalIntervalPriceRef string
+	for _, c := range f.FareTables[0].Cells {
+		if c.DistanceMatrixElementPrice.DistanceMatrixElementRef.Ref == distanceMatrixElementId {
+			geographicalIntervalPriceRef = c.DistanceMatrixElementPrice.GeographicalIntervalPriceRef.Ref
+			break
+		}
+	}
+
+	// get price from price group id
+	for _, p := range f.PriceGroups {
+		if p.GeographicalIntervalPrice[0].Id == geographicalIntervalPriceRef {
+			fare, err = currency.NewAmount(p.GeographicalIntervalPrice[0].Amount, f.Currency)
+			break
+		}
+	}
+
+	return fare, err
 }
