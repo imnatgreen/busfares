@@ -47,7 +47,7 @@ func (f *FareObjects) AddZip(path string) (err error) {
 				log.Fatalf("failed to open file %s in %s", file.Name, path)
 				return err
 			}
-			log.Printf("adding xml %s from zip", file.Name)
+			//log.Printf("adding xml %s from zip", file.Name)
 			f.AddXml(openFile)
 		}
 	}
@@ -101,7 +101,11 @@ func GetDatasets(dir string, nocs string) (err error) {
 	}
 	url := os.Getenv("BODS_API_BASE") + "/fares/dataset/?noc=" + nocs + "&status=published&api_key=" + os.Getenv("BODS_API_KEY")
 	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
 	var apiResponse ApiResponse
+	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
 	if err != nil {
 		return err

@@ -19,6 +19,10 @@
 6236.zip
 gtfs
 ROST_*.xml
+fareObjects.json
+import_netex_fares.py
+live.txt
+data/fares
 
 # Local env
 .env

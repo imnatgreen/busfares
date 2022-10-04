@@ -11,6 +11,7 @@ import (
 type Noc = agency.Noc
 type Naptan string
 
+// XmlTime allows timestamps in FareXChange XML to be unmarshalled into time.Time objects.
 type XmlTime struct {
 	time.Time
 }
@@ -168,17 +169,13 @@ type ScheduledStopPointRef struct {
 	Name string `xml:",chardata"`
 }
 
-func ParseFares() {
-	// TODO
-}
-
 func ParseXml(data []byte) (FareObject, error) {
 	var obj FareObject
 	err := xml.Unmarshal(data, &obj)
 	return obj, err
 }
 
-func (f FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) {
+func (f *FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) {
 	// get fare zones from stops
 	fromRef := string("atco:" + from)
 	toRef := string("atco:" + to)
@@ -223,4 +220,34 @@ func (f FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) {
 	}
 
 	return fare, err
+}
+
+func (f *FareObject) ContainsOpAndLine(op Noc, lineCode string) bool {
+	for _, line := range f.Lines {
+		if line.OperatorRef.Ref == "noc:"+string(op) && line.PublicCode == lineCode {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *FareObject) ContainsStops(from, to Naptan) bool {
+	fromRef := string("atco:" + from)
+	toRef := string("atco:" + to)
+
+	fromExists, toExists := false, false
+
+	for _, stop := range f.ScheduledStopPoints {
+		if stop.ScheduledStopPointRef == fromRef {
+			fromExists = true
+		}
+		if stop.ScheduledStopPointRef == toRef {
+			toExists = true
+		}
+		if fromExists && toExists {
+			break
+		}
+	}
+
+	return fromExists && toExists
 }
