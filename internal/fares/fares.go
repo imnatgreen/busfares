@@ -2,6 +2,7 @@ package fares
 
 import (
 	"encoding/xml"
+	"errors"
 	"time"
 
 	"github.com/bojanz/currency"
@@ -169,13 +170,24 @@ type ScheduledStopPointRef struct {
 	Name string `xml:",chardata"`
 }
 
+// Type Fare is used when finding fares from an imported FareObject
+type Fare struct {
+	Amount                 currency.Amount
+	ValidBetween           ValidBetween
+	UserProfile            UserProfile
+	SalesOfferPackage      SalesOfferPackage
+	PreassignedFareProduct PreassignedFareProduct
+}
+
 func ParseXml(data []byte) (FareObject, error) {
 	var obj FareObject
 	err := xml.Unmarshal(data, &obj)
 	return obj, err
 }
 
-func (f *FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) {
+var ErrFareNotInTable = errors.New("fare not in table")
+
+func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 	// get fare zones from stops
 	fromRef := string("atco:" + from)
 	toRef := string("atco:" + to)
@@ -203,20 +215,80 @@ func (f *FareObject) GetFare(from, to Naptan) (fare currency.Amount, err error) 
 	}
 
 	// get price group id from distance matrix element id
+	// also get fare related refs if price group found
 	var geographicalIntervalPriceRef string
-	for _, c := range f.FareTables[0].Cells {
-		if c.DistanceMatrixElementPrice.DistanceMatrixElementRef.Ref == distanceMatrixElementId {
-			geographicalIntervalPriceRef = c.DistanceMatrixElementPrice.GeographicalIntervalPriceRef.Ref
+	var userProfileRef string
+	var salesOfferPackageRef string
+	var preassignedFareProductRef string
+	var tarrifRef string
+	for _, t := range f.FareTables {
+		for _, c := range t.Cells {
+			if c.DistanceMatrixElementPrice.DistanceMatrixElementRef.Ref == distanceMatrixElementId {
+				geographicalIntervalPriceRef = c.DistanceMatrixElementPrice.GeographicalIntervalPriceRef.Ref
+				userProfileRef = t.UserProfileRef.Ref
+				salesOfferPackageRef = t.SalesOfferPackageRef.Ref
+				preassignedFareProductRef = t.PreassignedFareProductRef.Ref
+				tarrifRef = t.TariffRef.Ref
+				break
+			}
+		}
+	}
+	// check if fare found, if not return empty fare
+	if geographicalIntervalPriceRef == "" {
+		return fare, ErrFareNotInTable
+	}
+
+	// get price from price group id
+	var fareAmount currency.Amount
+	for _, p := range f.PriceGroups {
+		if p.GeographicalIntervalPrice[0].Id == geographicalIntervalPriceRef {
+			fareAmount, err = currency.NewAmount(p.GeographicalIntervalPrice[0].Amount, f.Currency)
 			break
 		}
 	}
 
-	// get price from price group id
-	for _, p := range f.PriceGroups {
-		if p.GeographicalIntervalPrice[0].Id == geographicalIntervalPriceRef {
-			fare, err = currency.NewAmount(p.GeographicalIntervalPrice[0].Amount, f.Currency)
+	// get user profile
+	var userProfile UserProfile
+	for _, u := range f.UserProfiles {
+		if u.Id == userProfileRef {
+			userProfile = u
 			break
 		}
+	}
+
+	// get sales offer package
+	var salesOfferPackage SalesOfferPackage
+	for _, s := range f.SalesOfferPackages {
+		if s.Id == salesOfferPackageRef {
+			salesOfferPackage = s
+			break
+		}
+	}
+
+	// get preassigned fare product
+	var preassignedFareProduct PreassignedFareProduct
+	for _, p := range f.FareProducts {
+		if p.Id == preassignedFareProductRef {
+			preassignedFareProduct = p
+			break
+		}
+	}
+
+	// get ValidBetween
+	var validBetween ValidBetween
+	for _, t := range f.Tariffs {
+		if t.Id == tarrifRef {
+			validBetween = t.ValidBetween
+			break
+		}
+	}
+
+	fare = Fare{
+		Amount:                 fareAmount,
+		ValidBetween:           validBetween,
+		UserProfile:            userProfile,
+		SalesOfferPackage:      salesOfferPackage,
+		PreassignedFareProduct: preassignedFareProduct,
 	}
 
 	return fare, err

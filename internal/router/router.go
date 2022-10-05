@@ -2,9 +2,9 @@ package router
 
 import (
 	"encoding/json"
+	"log"
 	"strings"
 
-	"github.com/bojanz/currency"
 	"github.com/imnatgreen/busfares/internal/agency"
 	"github.com/imnatgreen/busfares/internal/fares"
 )
@@ -33,7 +33,7 @@ type leg struct {
 	To                   legVertex   `json:"to"`
 	LegGeometry          legGeometry `json:"legGeometry"`
 	RouteShortName       string      `json:"routeShortName"`
-	Fare                 legFare
+	Fares                []fares.Fare
 }
 
 type legVertex struct {
@@ -47,51 +47,51 @@ type legGeometry struct {
 	Lenght int    `json:"length"`
 }
 
-type legFare struct {
-	Amount currency.Amount
-	// TODO: user profiles, how to purchase, etc.
-}
-
 func ParseJson(data []byte) (TripPlannerResponse, error) {
 	var response TripPlannerResponse
 	err := json.Unmarshal(data, &response)
 	return response, err
 }
 
-func (r *TripPlannerResponse) GetFares(f *fares.FareObjects, a *agency.Agencies) (err error) {
-	for _, itinerary := range r.Plan.Itineraries {
-		for _, leg := range itinerary.Legs {
+// AddFares adds a list of possible fares to each transit leg in the response
+func (r *TripPlannerResponse) AddFares(f *fares.FareObjects, a *agency.Agencies) (err error) {
+	for i, itinerary := range r.Plan.Itineraries {
+		for l, leg := range itinerary.Legs {
 			if leg.TransitLeg {
 				agencyId := agency.AgencyId(TrimId(leg.AgencyId))
 				noc, err := a.GetNoc(agencyId)
 				if err != nil {
 					return err
 				}
-				leg.GetFare(f, noc) // TODO: pass user profiles
+				// use i and l to update original leg
+				r.Plan.Itineraries[i].Legs[l].GetFares(f, noc)
 			}
 		}
 	}
 	return err
 }
 
-func (l *leg) GetFare(f *fares.FareObjects, n agency.Noc) (err error) {
+// GetFares finds the possible fares for the given transit leg and returns them
+func (l *leg) GetFares(f *fares.FareObjects, n agency.Noc) (err error) {
 	from := fares.Naptan(TrimId(l.From.StopId))
 	to := fares.Naptan(TrimId(l.To.StopId))
-
+	fareSlice := []fares.Fare{}
 	for _, obj := range f.Objects {
 		if obj.ContainsOpAndLine(n, l.RouteShortName) {
 			if obj.ContainsStops(from, to) {
-				if obj.FareProducts[0].ProductType == "singleTrip" && obj.FareProducts[0].Id == "Trip@Single" {
-					fare, err := obj.GetFare(from, to)
-					if err != nil {
-						return err
-					}
-					l.Fare.Amount = fare
-					return nil
+				fare, err := obj.GetFare(from, to)
+				if err != nil && err != fares.ErrFareNotInTable {
+					return err
+				}
+				if err != fares.ErrFareNotInTable {
+					log.Printf("importing fare %s", fare.PreassignedFareProduct.Id)
+					l.Fares = append(l.Fares, fare)
+					fareSlice = append(fareSlice, fare)
 				}
 			}
 		}
 	}
+	log.Printf("found %d fares for leg %s", len(fareSlice), l.RouteShortName)
 	return err
 }
 
