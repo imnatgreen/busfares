@@ -33,10 +33,17 @@ func main() {
 
 	var fareObjects fares.FareObjects
 
-	//downloadDatasets()
-	//addDatasets(&fareObjects)
+	// err = fares.GetDatasets("data/fares", os.Getenv("NOCS"))
+	// if err != nil {
+	// 	log.Fatalf("failed to get datasets: %v", err)
+	// }
 
-	// save fareObjects to disk
+	// err = fareObjects.AddDir("data/fares")
+	// if err != nil {
+	// 	log.Fatalf("failed to add directory: %v", err)
+	// }
+
+	// // save fareObjects to disk
 	// start := time.Now()
 	// err = persist.Save("fareObjects.json", fareObjects)
 	// if err != nil {
@@ -55,8 +62,6 @@ func main() {
 	// load agencies from GTFS files
 	start = time.Now()
 	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
-	aTest, _ := agencies.GetNoc("OP291")
-	log.Print(aTest)
 	log.Printf("loaded %d agencies from disk in %s", len(agencies), time.Since(start))
 
 	// test router
@@ -69,14 +74,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// get fares for router response
 	start = time.Now()
 	err = res.AddFares(&fareObjects, &agencies)
 	log.Printf("added fares to response in %s", time.Since(start))
-
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(currency.NewFormatter(currency.NewLocale("gb")).Format(res.Plan.Itineraries[1].Legs[1].Fares[16].Amount))
+
+	log.Println(currency.NewFormatter(currency.NewLocale("gb")).Format(res.Plan.Itineraries[1].Legs[1].Fares[1].Amount))
 	log.Print(res.Plan.Itineraries[1].Legs[1].Fares)
 	//log.Print(res)
 	//log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
@@ -144,28 +150,5 @@ func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {
 			}
 		}
 	}
-	log.Printf("imported %d agencies", len(agencies))
 	return agencies, nil
 }
-
-func downloadDatasets() error {
-	err := fares.GetDatasets("data/fares", os.Getenv("NOCS"))
-	if err != nil {
-		log.Fatalf("failed to get datasets: %v", err)
-		return err
-	}
-	return nil
-}
-
-func addDatasets(fareObjects *fares.FareObjects) error {
-	start := time.Now()
-	err := fareObjects.AddDir("data/fares")
-	if err != nil {
-		log.Fatalf("failed to add directory: %v", err)
-	}
-	log.Printf("parsed all fares in %s", time.Since(start))
-	return nil
-}
-
-// https://github.com/antchfx/xmlquery ? -> xpath?
-// https://stackoverflow.com/questions/30256729
