@@ -14,7 +14,7 @@ type Naptan string
 
 // XmlTime allows timestamps in FareXChange XML to be unmarshalled into time.Time objects.
 type XmlTime struct {
-	time.Time
+	time.Time `json:"time"`
 }
 
 func (x *XmlTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -75,30 +75,30 @@ type DistanceMatrixElement struct {
 }
 
 type ValidBetween struct {
-	FromDate XmlTime `xml:"FromDate"`
-	ToDate   XmlTime `xml:"ToDate"`
+	FromDate XmlTime `xml:"FromDate" json:"fromDate"`
+	ToDate   XmlTime `xml:"ToDate" json:"toDate"`
 }
 
 type UserProfile struct {
-	Id         string `xml:"id,attr"`
-	Name       string `xml:"Name"`
-	UserType   string `xml:"UserType"`
-	MinimumAge string `xml:"MinimumAge"`
-	MaximumAge string `xml:"MaximumAge"`
+	Id         string `xml:"id,attr" json:"id"`
+	Name       string `xml:"Name" json:"name"`
+	UserType   string `xml:"UserType" json:"userType"`
+	MinimumAge string `xml:"MinimumAge" json:"minimumAge"`
+	MaximumAge string `xml:"MaximumAge" json:"maximumAge"`
 }
 
 type PreassignedFareProduct struct {
-	Id             string `xml:"id,attr"`
-	Name           string `xml:"Name"`
-	ChargingMoment string `xml:"ChargingMomentType"`
-	TariffBasis    string `xml:"ConditionSummary>TariffBasis"`
-	ProductType    string `xml:"ProductType"`
+	Id             string `xml:"id,attr" json:"id"`
+	Name           string `xml:"Name" json:"name"`
+	ChargingMoment string `xml:"ChargingMomentType" json:"chargingMoment"`
+	TariffBasis    string `xml:"ConditionSummary>TariffBasis" json:"tariffBasis"`
+	ProductType    string `xml:"ProductType" json:"productType"`
 }
 
 type SalesOfferPackage struct {
-	Id          string `xml:"id,attr"`
-	Name        string `xml:"Name"`
-	Description string `xml:"Description"`
+	Id          string `xml:"id,attr" json:"id"`
+	Name        string `xml:"Name" json:"name"`
+	Description string `xml:"Description" json:"description"`
 }
 
 type PriceGroup struct {
@@ -172,11 +172,11 @@ type ScheduledStopPointRef struct {
 
 // Type Fare is used when finding fares from an imported FareObject
 type Fare struct {
-	Amount                 currency.Amount
-	ValidBetween           ValidBetween
-	UserProfile            UserProfile
-	SalesOfferPackage      SalesOfferPackage
-	PreassignedFareProduct PreassignedFareProduct
+	Amount                 currency.Amount        `json:"amount"`
+	ValidBetween           ValidBetween           `json:"validBetween"`
+	UserProfile            UserProfile            `json:"userProfile"`
+	SalesOfferPackage      SalesOfferPackage      `json:"salesOfferPackage"`
+	PreassignedFareProduct PreassignedFareProduct `json:"preassignedFareProduct"`
 }
 
 func ParseXml(data []byte) (FareObject, error) {

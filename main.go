@@ -4,6 +4,7 @@ package main
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"io"
 	"time"
 
@@ -16,11 +17,15 @@ import (
 
 	"github.com/bojanz/currency"
 	"github.com/imnatgreen/busfares/internal/agency"
+	"github.com/imnatgreen/busfares/internal/api"
 	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/imnatgreen/busfares/internal/persist"
 	"github.com/imnatgreen/busfares/internal/router"
 	// "github.com/jackc/pgx"
 )
+
+var fareObjects fares.FareObjects
+var agencies agency.Agencies
 
 func main() {
 	// conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
@@ -31,7 +36,7 @@ func main() {
 
 	var err error
 
-	var fareObjects fares.FareObjects
+	//var fareObjects fares.FareObjects
 
 	// err = fares.GetDatasets("data/fares", os.Getenv("NOCS"))
 	// if err != nil {
@@ -61,13 +66,13 @@ func main() {
 
 	// load agencies from GTFS files
 	start = time.Now()
-	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
+	agencies, _ = loadAgencies(os.Getenv("GTFS_DIR"))
 	log.Printf("loaded %d agencies from disk in %s", len(agencies), time.Since(start))
 
 	// test router
-	json, _ := os.Open("internal/router/resp.json")
-	defer json.Close()
-	data, _ := io.ReadAll(json)
+	jsonData, _ := os.Open("internal/router/resp.json")
+	defer jsonData.Close()
+	data, _ := io.ReadAll(jsonData)
 	var res router.TripPlannerResponse
 	res, err = router.ParseJson(data)
 	if err != nil {
@@ -82,8 +87,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// test add fares as json
+	encoded, err := json.Marshal(res)
+	if err != nil {
+		log.Print(err)
+	}
+	log.Print(string(encoded))
+
 	log.Println(currency.NewFormatter(currency.NewLocale("gb")).Format(res.Plan.Itineraries[1].Legs[1].Fares[1].Amount))
-	log.Print(res.Plan.Itineraries[1].Legs[1].Fares)
+	// log.Print(res.Plan.Itineraries[1].Legs[1].Fares)
+	api.HandleRequests(&fareObjects, &agencies)
 	//log.Print(res)
 	//log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
 

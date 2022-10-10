@@ -11,39 +11,39 @@ import (
 )
 
 type TripPlannerResponse struct {
-	Plan tripPlan `json:"plan"`
+	Plan TripPlan `json:"plan"`
 }
 
-type tripPlan struct {
-	Itineraries []itinerary `json:"itineraries"`
+type TripPlan struct {
+	Itineraries []Itinerary `json:"itineraries"`
 }
 
-type itinerary struct {
-	Legs []leg `json:"legs"`
+type Itinerary struct {
+	Legs []Leg `json:"legs"`
 }
 
-type leg struct {
-	StartTime            int64       `json:"startTime"`
-	EndTime              int64       `json:"endTime"`
-	Mode                 string      `json:"mode"`
-	TransitLeg           bool        `json:"transitLeg"`
-	AgencyTimeZoneOffset int         `json:"agencyTimeZoneOffset"`
-	AgencyId             string      `json:"agencyId"`
-	ServiceDate          string      `json:"serviceDate"`
-	From                 legVertex   `json:"from"`
-	To                   legVertex   `json:"to"`
-	LegGeometry          legGeometry `json:"legGeometry"`
-	RouteShortName       string      `json:"routeShortName"`
-	Fares                []fares.Fare
+type Leg struct {
+	StartTime            int64        `json:"startTime"`
+	EndTime              int64        `json:"endTime"`
+	Mode                 string       `json:"mode"`
+	TransitLeg           bool         `json:"transitLeg"`
+	AgencyTimeZoneOffset int          `json:"agencyTimeZoneOffset"`
+	AgencyId             string       `json:"agencyId"`
+	ServiceDate          string       `json:"serviceDate"`
+	From                 LegVertex    `json:"from"`
+	To                   LegVertex    `json:"to"`
+	LegGeometry          LegGeometry  `json:"legGeometry"`
+	RouteShortName       string       `json:"routeShortName"`
+	Fares                []fares.Fare `json:"fares"`
 }
 
-type legVertex struct {
+type LegVertex struct {
 	Name       string `json:"name"`
 	StopId     string `json:"stopId"`
 	VertexType string `json:"vertexType"`
 }
 
-type legGeometry struct {
+type LegGeometry struct {
 	Points string `json:"points"`
 	Lenght int    `json:"length"`
 }
@@ -73,7 +73,7 @@ func (r *TripPlannerResponse) AddFares(f *fares.FareObjects, a *agency.Agencies)
 }
 
 // GetFares finds the possible fares for the given transit leg and returns them
-func (l *leg) GetFares(f *fares.FareObjects, n agency.Noc) (err error) {
+func (l *Leg) GetFares(f *fares.FareObjects, n agency.Noc) (err error) {
 	// find all possible fares
 	from := fares.Naptan(TrimId(l.From.StopId))
 	to := fares.Naptan(TrimId(l.To.StopId))
@@ -139,8 +139,8 @@ func TrimId(id string) string {
 	return strings.TrimPrefix(id, "2:")
 }
 
-func FilterTransitLegs(response TripPlannerResponse) []leg {
-	var transitLegs []leg
+func FilterTransitLegs(response TripPlannerResponse) []Leg {
+	var transitLegs []Leg
 	for _, itinerary := range response.Plan.Itineraries {
 		for _, leg := range itinerary.Legs {
 			if leg.TransitLeg {
