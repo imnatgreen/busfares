@@ -8,7 +8,7 @@ import (
 	"io"
 	"time"
 
-	// "context"
+	"context"
 
 	"io/fs"
 	"log"
@@ -21,17 +21,17 @@ import (
 	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/imnatgreen/busfares/internal/persist"
 	"github.com/imnatgreen/busfares/internal/router"
-	// "github.com/jackc/pgx"
+	"github.com/jackc/pgx/v5"
 )
 
 func main() {
-	// conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-	// if err != nil {
-	// 	log.Fatalf("unable to connect to database: %v", err)
-	// }
-	// defer conn.Close(context.Background())
-
 	var err error
+
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("unable to connect to database: %v", err)
+	}
+	defer conn.Close(context.Background())
 
 	var fareObjects fares.FareObjects
 
