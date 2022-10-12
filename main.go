@@ -24,9 +24,6 @@ import (
 	// "github.com/jackc/pgx"
 )
 
-var fareObjects fares.FareObjects
-var agencies agency.Agencies
-
 func main() {
 	// conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	// if err != nil {
@@ -36,7 +33,7 @@ func main() {
 
 	var err error
 
-	//var fareObjects fares.FareObjects
+	var fareObjects fares.FareObjects
 
 	// err = fares.GetDatasets("data/fares", os.Getenv("NOCS"))
 	// if err != nil {
@@ -66,7 +63,7 @@ func main() {
 
 	// load agencies from GTFS files
 	start = time.Now()
-	agencies, _ = loadAgencies(os.Getenv("GTFS_DIR"))
+	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
 	log.Printf("loaded %d agencies from disk in %s", len(agencies), time.Since(start))
 
 	// test router
