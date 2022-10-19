@@ -2,6 +2,7 @@ package fares
 
 import (
 	"archive/zip"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"io"
@@ -14,24 +15,38 @@ import (
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
+	"github.com/jackc/pgx/v5"
 )
 
 type FareObjects struct {
 	Objects []FareObject
 }
 
-func (f *FareObjects) AddXml(file io.ReadCloser) (err error) {
+func AddFareObject(c *pgx.Conn, f *FareObject) (err error) {
+	fareObjectJson, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
+	_, err = c.Exec(context.Background(), "INSERT INTO fares (fare_object) VALUES ($1)", fareObjectJson)
+	if err != nil {
+		log.Printf("failed to insert fare object: %s", err)
+		return err
+	}
+	return err
+}
+
+func AddXml(c *pgx.Conn, file io.ReadCloser) (err error) {
 	defer file.Close()
 	var obj FareObject
 	err = xml.NewDecoder(file).Decode(&obj)
 	if err != nil {
 		return err
 	}
-	f.Objects = append(f.Objects, obj)
+	AddFareObject(c, &obj)
 	return err
 }
 
-func (f *FareObjects) AddZip(path string) (err error) {
+func AddZip(c *pgx.Conn, path string) (err error) {
 	openZipFile, err := zip.OpenReader(path)
 	if err != nil {
 		log.Fatalf("failed to open zip file %s", path)
@@ -48,13 +63,13 @@ func (f *FareObjects) AddZip(path string) (err error) {
 				return err
 			}
 			//log.Printf("adding xml %s from zip", file.Name)
-			f.AddXml(openFile)
+			AddXml(c, openFile)
 		}
 	}
 	return err
 }
 
-func (f *FareObjects) AddDir(dir string) (err error) {
+func AddDir(c *pgx.Conn, dir string) (err error) {
 	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -68,7 +83,7 @@ func (f *FareObjects) AddDir(dir string) (err error) {
 		// }
 		if filepath.Ext(d.Name()) == ".zip" {
 			log.Printf("adding zip %s", d.Name())
-			f.AddZip(path)
+			AddZip(c, path)
 		}
 		if filepath.Ext(d.Name()) == ".xml" {
 			xml, err := os.Open(path)
@@ -77,7 +92,7 @@ func (f *FareObjects) AddDir(dir string) (err error) {
 			}
 			defer xml.Close()
 			log.Printf("adding xml %s", d.Name())
-			f.AddXml(xml)
+			AddXml(c, xml)
 		}
 		return nil
 	})
