@@ -40,22 +40,6 @@ func main() {
 	// 	log.Fatalf("failed to add directory: %v", err)
 	// }
 
-	// // save fareObjects to disk
-	// start := time.Now()
-	// err = persist.Save("fareObjects.json", fareObjects)
-	// if err != nil {
-	// 	log.Fatalf("failed to save fareObjects: %v", err)
-	// }
-	// log.Printf("saved fares to disk in %s", time.Since(start))
-
-	// load fareObjects from disk
-	// start := time.Now()
-	// err = persist.Load("fareObjects.json", &fareObjects)
-	// if err != nil {
-	// 	log.Fatalf("failed to load fareObjects: %v", err)
-	// }
-	// log.Printf("loaded %d fareObjects from disk in %s", len(fareObjects.Objects), time.Since(start))
-
 	// load agencies from GTFS files
 	start := time.Now()
 	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
