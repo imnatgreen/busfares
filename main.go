@@ -91,29 +91,6 @@ func main() {
 	// api.HandleRequests(&fareObjects, &agencies)
 	//log.Print(res)
 	//log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
-
-	// test fares
-	// xml, _ := os.Open("internal/fares/ROST_483_Outbound_Single_.xml")
-	// defer xml.Close()
-	// xmlData, _ := io.ReadAll(xml)
-	// var fareData fares.FareObject
-
-	// start = time.Now()
-	// fareData, err = fares.ParseXml(xmlData)
-	// log.Printf("parsed fares in %s", time.Since(start))
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// log.Print(fareData.Tariffs[0].ValidBetween.FromDate.Time)
-	// start = time.Now()
-	// fare, err := fareData.GetFare("25001425", "2500IMG2914")
-	// log.Printf("got fare in %s", time.Since(start))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// log.Println(currency.NewFormatter(currency.NewLocale("gb")).Format(fare))
-	// log.Print(fareData)
 }
 
 func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {

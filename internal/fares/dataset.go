@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
@@ -54,15 +53,12 @@ func AddZip(c *pgx.Conn, path string) (err error) {
 	}
 	defer openZipFile.Close()
 	for _, file := range openZipFile.File {
-		// if filepath.Ext(file.Name) == ".xml" {
-		// temporarily only add ROST fare files
-		if filepath.Ext(file.Name) == ".xml" && strings.HasPrefix(file.Name, "ROST") {
+		if filepath.Ext(file.Name) == ".xml" {
 			openFile, err := file.Open()
 			if err != nil {
 				log.Fatalf("failed to open file %s in %s", file.Name, path)
 				return err
 			}
-			//log.Printf("adding xml %s from zip", file.Name)
 			AddXml(c, openFile)
 		}
 	}

@@ -95,51 +95,20 @@ func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
 		return err
 	}
 
-	// start = time.Now()
-	// fareObjects, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (fares.FareObject, error) {
-	// 	var f fares.FareObject
-	// 	var uuid []byte
-	// 	startLoop := time.Now()
-	// 	err := row.Scan(&uuid, &f)
-	// 	log.Printf("row scan took %s", time.Since(startLoop))
-	// 	return f, err
-	// })
-	// log.Printf("collecting rows took %s", time.Since(start))
-	fareObjects := []fares.FareObject{}
-
 	start = time.Now()
-	for rows.Next() {
-		var f fares.FareObject
-		timeScan := time.Now()
-		values := rows.RawValues()
-		log.Printf("raw values took %s", time.Since(timeScan))
-		if err != nil {
+	var uuid []byte
+	var obj fares.FareObject
+	pgx.ForEachRow(rows, []any{&uuid, &obj}, func() error {
+		fare, err := obj.GetFare(from, to)
+		if err != nil && err != fares.ErrFareNotInTable {
 			return err
 		}
-		timeScan = time.Now()
-		err = json.Unmarshal(values[1], &f)
-		log.Printf("unmarshal took %s", time.Since(timeScan))
-		// err := rows.Scan(&uuid, &f)
-		if err != nil {
-			return err
+		if err != fares.ErrFareNotInTable {
+			fareSlice = append(fareSlice, fare)
 		}
-		fareObjects = append(fareObjects, f)
-	}
-	log.Printf("scanning rows took %s", time.Since(start))
-	// pgx.ForEachRow(rows, )
-
-	for _, obj := range fareObjects {
-		if obj.ContainsStops(from, to) {
-			fare, err := obj.GetFare(from, to)
-			if err != nil && err != fares.ErrFareNotInTable {
-				return err
-			}
-			if err != fares.ErrFareNotInTable {
-				log.Printf("importing fare %s", fare.PreassignedFareProduct.Id)
-				fareSlice = append(fareSlice, fare)
-			}
-		}
-	}
+		return nil
+	})
+	log.Printf("processed query in %s", time.Since(start))
 
 	// sort fares by type
 	sort.Slice(fareSlice, func(i, j int) bool {

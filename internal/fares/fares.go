@@ -293,33 +293,3 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 
 	return fare, err
 }
-
-func (f *FareObject) ContainsOpAndLine(op Noc, lineCode string) bool {
-	for _, line := range f.Lines {
-		if line.OperatorRef.Ref == "noc:"+string(op) && line.PublicCode == lineCode {
-			return true
-		}
-	}
-	return false
-}
-
-func (f *FareObject) ContainsStops(from, to Naptan) bool {
-	fromRef := string("atco:" + from)
-	toRef := string("atco:" + to)
-
-	fromExists, toExists := false, false
-
-	for _, stop := range f.ScheduledStopPoints {
-		if stop.ScheduledStopPointRef == fromRef {
-			fromExists = true
-		}
-		if stop.ScheduledStopPointRef == toRef {
-			toExists = true
-		}
-		if fromExists && toExists {
-			break
-		}
-	}
-
-	return fromExists && toExists
-}
