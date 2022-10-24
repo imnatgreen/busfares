@@ -1,13 +1,17 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/imnatgreen/busfares/internal/agency"
 	"github.com/imnatgreen/busfares/internal/fares"
+	"github.com/jackc/pgx/v5"
 )
 
 type TripPlannerResponse struct {
@@ -55,7 +59,7 @@ func ParseJson(data []byte) (TripPlannerResponse, error) {
 }
 
 // AddFares adds a list of possible fares to each transit leg in the response
-func (r *TripPlannerResponse) AddFares(f *fares.FareObjects, a *agency.Agencies) (err error) {
+func (r *TripPlannerResponse) AddFares(c *pgx.Conn, a *agency.Agencies) (err error) {
 	for i, itinerary := range r.Plan.Itineraries {
 		for l, leg := range itinerary.Legs {
 			if leg.TransitLeg {
@@ -65,7 +69,7 @@ func (r *TripPlannerResponse) AddFares(f *fares.FareObjects, a *agency.Agencies)
 					return err
 				}
 				// use i and l to update original leg
-				r.Plan.Itineraries[i].Legs[l].GetFares(f, noc)
+				r.Plan.Itineraries[i].Legs[l].GetFares(c, noc)
 			}
 		}
 	}
@@ -73,22 +77,66 @@ func (r *TripPlannerResponse) AddFares(f *fares.FareObjects, a *agency.Agencies)
 }
 
 // GetFares finds the possible fares for the given transit leg and returns them
-func (l *Leg) GetFares(f *fares.FareObjects, n agency.Noc) (err error) {
+func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
 	// find all possible fares
 	from := fares.Naptan(TrimId(l.From.StopId))
 	to := fares.Naptan(TrimId(l.To.StopId))
 	fareSlice := []fares.Fare{}
-	for _, obj := range f.Objects {
-		if obj.ContainsOpAndLine(n, l.RouteShortName) {
-			if obj.ContainsStops(from, to) {
-				fare, err := obj.GetFare(from, to)
-				if err != nil && err != fares.ErrFareNotInTable {
-					return err
-				}
-				if err != fares.ErrFareNotInTable {
-					log.Printf("importing fare %s", fare.PreassignedFareProduct.Id)
-					fareSlice = append(fareSlice, fare)
-				}
+
+	start := time.Now()
+
+	query := fmt.Sprintf(`select *
+	from fares
+	where fare_object->'Lines' @> '[{"PublicCode": "%s", "OperatorRef": {"Ref": "noc:%s"}}]'
+		and fare_object->'ScheduledStopPoints' @> '[{"ScheduledStopPointRef": "atco:%s"}, {"ScheduledStopPointRef": "atco:%s"}]';`, l.RouteShortName, n, from, to)
+	rows, err := c.Query(context.Background(), query)
+	log.Printf("query took %s", time.Since(start))
+	if err != nil {
+		return err
+	}
+
+	// start = time.Now()
+	// fareObjects, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (fares.FareObject, error) {
+	// 	var f fares.FareObject
+	// 	var uuid []byte
+	// 	startLoop := time.Now()
+	// 	err := row.Scan(&uuid, &f)
+	// 	log.Printf("row scan took %s", time.Since(startLoop))
+	// 	return f, err
+	// })
+	// log.Printf("collecting rows took %s", time.Since(start))
+	fareObjects := []fares.FareObject{}
+
+	start = time.Now()
+	for rows.Next() {
+		var f fares.FareObject
+		timeScan := time.Now()
+		values := rows.RawValues()
+		log.Printf("raw values took %s", time.Since(timeScan))
+		if err != nil {
+			return err
+		}
+		timeScan = time.Now()
+		err = json.Unmarshal(values[1], &f)
+		log.Printf("unmarshal took %s", time.Since(timeScan))
+		// err := rows.Scan(&uuid, &f)
+		if err != nil {
+			return err
+		}
+		fareObjects = append(fareObjects, f)
+	}
+	log.Printf("scanning rows took %s", time.Since(start))
+	// pgx.ForEachRow(rows, )
+
+	for _, obj := range fareObjects {
+		if obj.ContainsStops(from, to) {
+			fare, err := obj.GetFare(from, to)
+			if err != nil && err != fares.ErrFareNotInTable {
+				return err
+			}
+			if err != fares.ErrFareNotInTable {
+				log.Printf("importing fare %s", fare.PreassignedFareProduct.Id)
+				fareSlice = append(fareSlice, fare)
 			}
 		}
 	}

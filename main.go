@@ -17,9 +17,6 @@ import (
 
 	"github.com/bojanz/currency"
 	"github.com/imnatgreen/busfares/internal/agency"
-	"github.com/imnatgreen/busfares/internal/api"
-	"github.com/imnatgreen/busfares/internal/fares"
-	"github.com/imnatgreen/busfares/internal/persist"
 	"github.com/imnatgreen/busfares/internal/router"
 	"github.com/jackc/pgx/v5"
 )
@@ -33,14 +30,12 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	var fareObjects fares.FareObjects
-
 	// err = fares.GetDatasets("data/fares", os.Getenv("NOCS"))
 	// if err != nil {
 	// 	log.Fatalf("failed to get datasets: %v", err)
 	// }
 
-	// err = fareObjects.AddDir("data/fares")
+	// err = fares.AddDir(conn, "data/fares")
 	// if err != nil {
 	// 	log.Fatalf("failed to add directory: %v", err)
 	// }
@@ -54,15 +49,15 @@ func main() {
 	// log.Printf("saved fares to disk in %s", time.Since(start))
 
 	// load fareObjects from disk
-	start := time.Now()
-	err = persist.Load("fareObjects.json", &fareObjects)
-	if err != nil {
-		log.Fatalf("failed to load fareObjects: %v", err)
-	}
-	log.Printf("loaded %d fareObjects from disk in %s", len(fareObjects.Objects), time.Since(start))
+	// start := time.Now()
+	// err = persist.Load("fareObjects.json", &fareObjects)
+	// if err != nil {
+	// 	log.Fatalf("failed to load fareObjects: %v", err)
+	// }
+	// log.Printf("loaded %d fareObjects from disk in %s", len(fareObjects.Objects), time.Since(start))
 
 	// load agencies from GTFS files
-	start = time.Now()
+	start := time.Now()
 	agencies, _ := loadAgencies(os.Getenv("GTFS_DIR"))
 	log.Printf("loaded %d agencies from disk in %s", len(agencies), time.Since(start))
 
@@ -78,7 +73,7 @@ func main() {
 
 	// get fares for router response
 	start = time.Now()
-	err = res.AddFares(&fareObjects, &agencies)
+	err = res.AddFares(conn, &agencies)
 	log.Printf("added fares to response in %s", time.Since(start))
 	if err != nil {
 		log.Fatal(err)
@@ -93,7 +88,7 @@ func main() {
 
 	log.Println(currency.NewFormatter(currency.NewLocale("gb")).Format(res.Plan.Itineraries[1].Legs[1].Fares[1].Amount))
 	// log.Print(res.Plan.Itineraries[1].Legs[1].Fares)
-	api.HandleRequests(&fareObjects, &agencies)
+	// api.HandleRequests(&fareObjects, &agencies)
 	//log.Print(res)
 	//log.Print(res.Plan.Itineraries[1].Legs[1].To.Name)
 

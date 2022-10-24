@@ -7,13 +7,13 @@ import (
 	"net/http"
 
 	"github.com/imnatgreen/busfares/internal/agency"
-	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/imnatgreen/busfares/internal/router"
+	"github.com/jackc/pgx/v5"
 )
 
-func HandleRequests(f *fares.FareObjects, a *agency.Agencies) {
+func HandleRequests(c *pgx.Conn, a *agency.Agencies) {
 	http.HandleFunc("/api/", homepage)
-	http.HandleFunc("/api/getfares", getFares(f, a))
+	http.HandleFunc("/api/getfares", getFares(c, a))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -21,7 +21,7 @@ func homepage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "busfares api")
 }
 
-func getFares(f *fares.FareObjects, a *agency.Agencies) http.HandlerFunc {
+func getFares(c *pgx.Conn, a *agency.Agencies) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 		tripPlan := router.TripPlannerResponse{}
@@ -30,7 +30,7 @@ func getFares(f *fares.FareObjects, a *agency.Agencies) http.HandlerFunc {
 			fmt.Fprintln(w, ":/ an error occured. check logs for details.")
 			log.Print(err)
 		}
-		tripPlan.AddFares(f, a)
+		tripPlan.AddFares(c, a)
 		err = json.NewEncoder(w).Encode(tripPlan)
 		if err != nil {
 			fmt.Fprintln(w, ":/ an error occured. check logs for details.")
