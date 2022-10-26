@@ -17,6 +17,13 @@ func HandleRequests(c *pgx.Conn, a *agency.Agencies) {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
+func Handler(prefix string, c *pgx.Conn, a *agency.Agencies) http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc(prefix+"/", homepage)
+	mux.HandleFunc(prefix+"/getfares", getFares(c, a))
+	return mux
+}
+
 func homepage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "busfares api")
 }
