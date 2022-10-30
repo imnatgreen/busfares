@@ -27,3 +27,6 @@ data/fares
 # Local env
 .env
 .vscode/launch.json
+
+# goreleaser
+dist/
