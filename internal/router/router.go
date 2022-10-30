@@ -134,7 +134,9 @@ func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
 	}
 
 	// remove empty slices
-	filteredFareSlices = filteredFareSlices[:j+1]
+	if len(filteredFareSlices) > 0 {
+		filteredFareSlices = filteredFareSlices[:j+1]
+	}
 
 	// only keep newest fare for each type
 	for _, fSlice := range filteredFareSlices {

@@ -206,10 +206,13 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 	}
 
 	// get distance matrix element id from fare zones
-	var distanceMatrixElementId string
+	// for some reason, some fare files have the ids the wrong way round, so we need to check with fare zones reversed too
+	var distanceMatrixElementIds []string
+
 	for _, d := range f.Tariffs[0].DistanceMatrixElements {
-		if d.StartTariffZoneRef.Ref == fromZone && d.EndTariffZoneRef.Ref == toZone {
-			distanceMatrixElementId = d.Id
+		if (d.StartTariffZoneRef.Ref == fromZone && d.EndTariffZoneRef.Ref == toZone) ||
+			(d.StartTariffZoneRef.Ref == toZone && d.EndTariffZoneRef.Ref == fromZone) {
+			distanceMatrixElementIds = append(distanceMatrixElementIds, d.Id)
 			break
 		}
 	}
@@ -221,15 +224,17 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 	var salesOfferPackageRef string
 	var preassignedFareProductRef string
 	var tarrifRef string
-	for _, t := range f.FareTables {
-		for _, c := range t.Cells {
-			if c.DistanceMatrixElementPrice.DistanceMatrixElementRef.Ref == distanceMatrixElementId {
-				geographicalIntervalPriceRef = c.DistanceMatrixElementPrice.GeographicalIntervalPriceRef.Ref
-				userProfileRef = t.UserProfileRef.Ref
-				salesOfferPackageRef = t.SalesOfferPackageRef.Ref
-				preassignedFareProductRef = t.PreassignedFareProductRef.Ref
-				tarrifRef = t.TariffRef.Ref
-				break
+	for _, d := range distanceMatrixElementIds {
+		for _, t := range f.FareTables {
+			for _, c := range t.Cells {
+				if c.DistanceMatrixElementPrice.DistanceMatrixElementRef.Ref == d {
+					geographicalIntervalPriceRef = c.DistanceMatrixElementPrice.GeographicalIntervalPriceRef.Ref
+					userProfileRef = t.UserProfileRef.Ref
+					salesOfferPackageRef = t.SalesOfferPackageRef.Ref
+					preassignedFareProductRef = t.PreassignedFareProductRef.Ref
+					tarrifRef = t.TariffRef.Ref
+					break
+				}
 			}
 		}
 	}
