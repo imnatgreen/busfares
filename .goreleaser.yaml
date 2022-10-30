@@ -15,7 +15,7 @@ builds:
       - darwin
 dockers:
   - image_templates:
-      - "gcr.io/imnatgreen/busfares:latest"
+      - "ghcr.io/imnatgreen/busfares:latest"
     extra_files:
       - "create-tables.sql"
 # archives:
