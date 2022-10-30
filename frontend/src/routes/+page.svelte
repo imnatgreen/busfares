@@ -4,7 +4,7 @@
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
 
-  import 'polyline-encoded/Polyline.encoded';
+  import { decode } from '@googlemaps/polyline-codec';
 
   let map;
   let mapContainer;
@@ -84,10 +84,8 @@
           weight: 6,
         };
 
-        // @ts-ignore
-        let haloLine: L.Polyline = L.Polyline.fromEncoded(leg.legGeometry.points, haloLineStyle).addTo(map);
-        // @ts-ignore
-        let line: L.Polyline = L.Polyline.fromEncoded(leg.legGeometry.points, lineStyle).addTo(map);
+        let haloLine: L.Polyline = new L.Polyline(decode(leg.legGeometry.points), haloLineStyle).addTo(map);
+        let line: L.Polyline = new L.Polyline(decode(leg.legGeometry.points), lineStyle).addTo(map);
         if (i == 0) {
           map.fitBounds(line.getBounds());
         }
