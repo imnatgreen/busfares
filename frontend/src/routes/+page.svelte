@@ -4,7 +4,7 @@
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
 
-  import 'polyline-encoded';
+  import 'polyline-encoded/Polyline.encoded';
 
   let map;
   let mapContainer;
