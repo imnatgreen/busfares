@@ -11,3 +11,8 @@ declare namespace App {
 interface ImportMetaEnv {
 	VITE_API_URL: string;
 }
+
+declare module 'leaflet?client' {
+	import all from 'leaflet';
+	export = all;
+}
