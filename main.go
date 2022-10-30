@@ -18,6 +18,7 @@ import (
 	"github.com/imnatgreen/busfares/frontend"
 	"github.com/imnatgreen/busfares/internal/agency"
 	"github.com/imnatgreen/busfares/internal/api"
+	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -25,12 +26,18 @@ func main() {
 	var err error
 
 	var devMode bool
+	var getDatasets bool
+	var addDatasets bool
+	var datasetDir string
 	var dbUrl string
 	var gtfsDir string
 	var nocs string
 	var bodsApiKey string
 	var bodsApiBase string
 	flag.BoolVar(&devMode, "dev", false, "run in dev mode")
+	flag.BoolVar(&getDatasets, "get-datasets", false, "download datasets from BODS into dir")
+	flag.BoolVar(&addDatasets, "add-datasets", false, "reset db, and then add datasets from dir to database")
+	flag.StringVar(&datasetDir, "datasets", os.Getenv("DATASET_DIR"), "directory containing gtfs files")
 	flag.StringVar(&dbUrl, "db", os.Getenv("DATABASE_URL"), "database url")
 	flag.StringVar(&gtfsDir, "gtfs", os.Getenv("GTFS_DIR"), "directory containing gtfs files")
 	flag.StringVar(&nocs, "nocs", os.Getenv("NOCS"), "comma separated list of NOCS")
@@ -44,15 +51,27 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	// err = fares.GetDatasets("data/fares", nocs)
-	// if err != nil {
-	// 	log.Fatalf("failed to get datasets: %v", err)
-	// }
+	if getDatasets {
+		err = fares.GetDatasets(datasetDir, nocs)
+		if err != nil {
+			log.Fatalf("failed to get datasets: %v", err)
+		}
+	}
 
-	// err = fares.AddDir(conn, "data/fares")
-	// if err != nil {
-	// 	log.Fatalf("failed to add directory: %v", err)
-	// }
+	if addDatasets {
+		sql, err := os.ReadFile("create-tables.sql")
+		if err != nil {
+			log.Fatalf("failed to read create-tables.sql: %v", err)
+		}
+		_, err = conn.Exec(context.Background(), string(sql))
+		if err != nil {
+			log.Fatalf("failed to create tables: %v", err)
+		}
+		err = fares.AddDir(conn, datasetDir)
+		if err != nil {
+			log.Fatalf("failed to add datasets to db: %v", err)
+		}
+	}
 
 	// load agencies from GTFS files
 	start := time.Now()
