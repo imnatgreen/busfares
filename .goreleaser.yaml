@@ -18,6 +18,8 @@ dockers:
       - "ghcr.io/imnatgreen/busfares:latest"
     extra_files:
       - "create-tables.sql"
+release:
+  github:
 # archives:
 #   - replacements:
 #       darwin: Darwin
