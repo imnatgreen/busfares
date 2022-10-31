@@ -1,8 +1,10 @@
 name: goreleaser
 
 on:
-  pull_request:
   push:
+    # only run against tags
+    tags:
+      - '*'
 
 jobs:
   goreleaser:
