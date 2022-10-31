@@ -31,7 +31,10 @@
   const otpBase = 'https://otp.nat.omg.lol/otp';
   let from = '53.70346,-2.24653';
   let to = '53.78967,-2.24336';
-
+  let now = new Date()
+  let date = now.toISOString().split('T')[0];
+  let time = now.getHours() + ':' + now.getMinutes();
+  let arriveBy = false;
   
   const getFares = async (tripPlan: object) => {
     tripPlanPlaceholder = 'getting fares...'
@@ -53,10 +56,11 @@
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
       fromPlace: from,
       toPlace: to,
-      date: now.toISOString(),
+      date: date,
+      time: time,
       mode: 'TRANSIT,WALK',
       maxWalkDistance: '2500',
-      arriveBy: 'false',
+      arriveBy: arriveBy ? 'true' : 'false',
       wheelchair: 'false',
       showIntermediateStops: 'true',
       locale: 'en'
@@ -97,6 +101,8 @@
 <p><i>plan a journey...</i></p>
 <p>from: <input bind:value={from} label="from"/></p>
 <p>to: <input bind:value={to} label="to"/></p>
+<p>date: <input type="date" bind:value={date} label="date"/> time: <input type="time" bind:value={time} label="time"/></p>
+<p>arrive by? <input type="checkbox" bind:checked={arriveBy} label="arrive by"/></p>
 <button on:click={getPlan}>find journey</button>
 <hr>
 {#if tripPlan}
