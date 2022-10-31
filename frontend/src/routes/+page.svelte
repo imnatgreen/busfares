@@ -5,26 +5,22 @@
   import 'leaflet/dist/leaflet.css';
 
   import { decode } from '@googlemaps/polyline-codec';
+	import Leaflet from '$lib/Leaflet.svelte';
+	import Polyline from '$lib/Polyline.svelte';
 
   let map;
-  let mapContainer;
+  // let mapContainer;
 
   let tripPlanPlaceholder = '';
   
-  onMount(() => {
-    const initialView = new L.LatLng(53.71,-2.24);
-    map = L.map(mapContainer, {preferCanvas: false}).setView(initialView, 10);
-    let layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
-      attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
-      minZoom: 0
-    });
-    layer.addTo(map);
-
-    return map.remove;
-  });
-
+  const initialView = [53.71,-2.24];
+  function resizeMap() {
+	  if(map) { map.invalidateSize(); }
+  }
+	
+	function resetMapView() {
+		map.setView(initialView, 10);
+	}
 
   // generate a path-dependent if we have VITE_API_URL defined (dev mode) or nor
   const apiUrl = (path: string) => `${import.meta.env.VITE_API_URL || ''}${path}`;
@@ -49,10 +45,10 @@
   };
 
   let tripPlan;
+  $: mapLines = [];
 
   const getPlan = async () => {
     tripPlanPlaceholder = 'getting trip plan...';
-    let now = new Date();
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
       fromPlace: from,
       toPlace: to,
@@ -76,27 +72,17 @@
     let legs = tripPlan.plan.itineraries[0].legs;
     legs.map((leg, i) => {
       if (leg.legGeometry.points) {
-        let mode = leg.mode;
-        let lineStyle = {
-          color: mode=='WALK' ? 'grey' : '#00839E',
-          dashArray: mode=='WALK' ? '.1 11' : null,
-          weight: 5,
-        };
-        let haloLineStyle = {
-          color: '#ffffff',
-          dashArray: mode=='WALK' ? '.1 11' : null,
-          weight: 6,
-        };
-
-        let haloLine: L.Polyline = new L.Polyline(decode(leg.legGeometry.points), haloLineStyle).addTo(map);
-        let line: L.Polyline = new L.Polyline(decode(leg.legGeometry.points), lineStyle).addTo(map);
-        if (i == 0) {
-          map.fitBounds(line.getBounds());
+        let line = {
+          id: i,
+          latLngs: decode(leg.legGeometry.points),
+          mode: leg.mode,
         }
+        mapLines = [...mapLines, line];
       }
     });
   }
 </script>
+<svelte:window on:resize={resizeMap} />
 
 <p><i>plan a journey...</i></p>
 <p>from: <input bind:value={from} label="from"/></p>
@@ -119,4 +105,19 @@
 {:else}
   <p>{tripPlanPlaceholder}</p>
 {/if}
-<div id="map" bind:this={mapContainer} style="height:600px;width:100%;"/>
+<div style="height:600px;width:100%;">
+  <Leaflet bind:map view={initialView} zoom={10}>
+    {#each mapLines as line}
+      <Polyline latLngs={line.latLngs} options={{
+        color: '#ffffff',
+        dashArray: line.mode=='WALK' ? '.1 11' : null,
+        weight: 6,
+      }}/>
+      <Polyline latLngs={line.latLngs} options={{
+        color: line.mode=='WALK' ? 'grey' : '#00839e',
+        dashArray: line.mode=='WALK' ? '.1 11' : null,
+        weight: 5,
+      }}/>
+    {/each}
+  </Leaflet>
+</div>
