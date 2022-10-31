@@ -15,9 +15,48 @@ builds:
       - darwin
 dockers:
   - image_templates:
-      - "ghcr.io/imnatgreen/busfares:latest"
+      - "ghcr.io/imnatgreen/busfares:latest-amd64"
+      - "ghcr.io/imnatgreen/busfares:{{ .Tag }}-amd64"
+      - "ghcr.io/imnatgreen/busfares:{{ .Major }}-amd64"
+    use: buildx
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
     extra_files:
       - "create-tables.sql"
+  - image_templates:
+      - "ghcr.io/imnatgreen/busfares:latest-arm64v8"
+      - "ghcr.io/imnatgreen/busfares:{{ .Tag }}-arm64v8"
+      - "ghcr.io/imnatgreen/busfares:{{ .Major }}-arm64v8"
+    use: buildx
+    goos: linux
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    extra_files:
+      - "create-tables.sql"
+docker_manifests:
+  - name_template: "ghcr.io/imnatgreen/busfares:latest"
+    image_templates:
+      - "ghcr.io/imnatgreen/busfares:latest-amd64"
+      - "ghcr.io/imnatgreen/busfares:latest-arm64v8"
+  - name_template: "ghcr.io/imnatgreen/busfares:{{ .Major }}"
+    image_templates:
+      - "ghcr.io/imnatgreen/busfares:{{ .Major }}-amd64"
+      - "ghcr.io/imnatgreen/busfares:{{ .Major }}-arm64v8"
+  - name_template: "ghcr.io/imnatgreen/busfares:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/imnatgreen/busfares:{{ .Tag }}-amd64"
+      - "ghcr.io/imnatgreen/busfares:{{ .Tag }}-arm64v8"
 release:
   github:
 # archives:
