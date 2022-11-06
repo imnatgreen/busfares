@@ -8,8 +8,7 @@
   const dispatch = createEventDispatcher();
   
 	// let layerPane = pane || getContext('pane');
-  // @ts-ignore
-  let layerGroup: L.LayerGroup = getContext('layerGroup')();
+  let layerGroup = getContext<() => L.LayerGroup>('layerGroup')();
 
   export let line: L.Polyline = new L.Polyline(latLngs, options)
     .on('click', (e) => dispatch('click', e))

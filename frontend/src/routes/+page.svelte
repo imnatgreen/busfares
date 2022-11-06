@@ -7,6 +7,7 @@
   import { decode } from '@googlemaps/polyline-codec';
 	import Leaflet from '$lib/Leaflet.svelte';
 	import Polyline from '$lib/Polyline.svelte';
+	import Popup from '$lib/Popup.svelte';
 
   let map;
   // let mapContainer;
@@ -48,6 +49,7 @@
   $: mapLines = [];
 
   const getPlan = async () => {
+    tripPlan = undefined;
     tripPlanPlaceholder = 'getting trip plan...';
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
       fromPlace: from,
@@ -70,6 +72,7 @@
 
   const testDrawLine = (tripPlan) => {
     let legs = tripPlan.plan.itineraries[0].legs;
+    mapLines = [];
     legs.map((leg, i) => {
       if (leg.legGeometry.points) {
         let line = {
@@ -83,6 +86,8 @@
   }
 </script>
 <svelte:window on:resize={resizeMap} />
+
+{@debug tripPlan}
 
 <p><i>plan a journey...</i></p>
 <p>from: <input bind:value={from} label="from"/></p>
@@ -117,7 +122,10 @@
         color: line.mode=='WALK' ? 'grey' : '#00839e',
         dashArray: line.mode=='WALK' ? '.1 11' : null,
         weight: 5,
-      }}/>
+      }}>
+        <Popup>{line.mode}</Popup>
+      </Polyline>
     {/each}
+    <Popup>test</Popup>
   </Leaflet>
 </div>
