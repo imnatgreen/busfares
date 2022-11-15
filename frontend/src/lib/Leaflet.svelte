@@ -27,7 +27,8 @@
   function createLeaflet(node) {
     map = L.map(node)
       .on('zoom', (e) => dispatch('zoom', e))
-      .on('click', (e) => dispatch('click', e));
+      .on('click', (e) => {dispatch('click', e);
+    console.log('clicked'+e.latlng.toString())});
 		if(bounds) {
       map.fitBounds(bounds)
 		} else {

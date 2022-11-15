@@ -28,9 +28,9 @@
   const otpBase = 'https://otp.nat.omg.lol/otp';
   let from = '53.70346,-2.24653';
   let to = '53.78967,-2.24336';
-  let now = new Date()
+  let now = new Date();
   let date = now.toISOString().split('T')[0];
-  let time = now.getHours() + ':' + now.getMinutes();
+  let time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes();
   let arriveBy = false;
   
   const getFares = async (tripPlan: object) => {
@@ -47,6 +47,7 @@
 
   let tripPlan;
   $: mapLines = [];
+  let currentItinerary = 0;
 
   const getPlan = async () => {
     tripPlan = undefined;
@@ -84,10 +85,57 @@
       }
     });
   }
+
+  $: if(tripPlan) {
+    drawLine(tripPlan.plan.itineraries[currentItinerary].legs);
+  }
+
+  const drawLine = (legs) => {
+    mapLines = [];
+    legs.map((leg, i) => {
+      if (leg.legGeometry.points) {
+        let line = {
+          id: i,
+          latLngs: decode(leg.legGeometry.points),
+          mode: leg.mode,
+        }
+        mapLines = [...mapLines, line];
+      }
+    });
+  }
+
+  let mapClickPopupContent;
+  let mapClickPopupEvent;
+  let mapClickPopup;
+  onMount(async () => {
+    mapClickPopup = L.popup();
+  })
+
+  const mapClick = (e) => {
+    mapClickPopupEvent = e.detail;
+    mapClickPopup
+      .setLatLng(mapClickPopupEvent.latlng)
+      .setContent(mapClickPopupContent)
+      .openOn(map);
+    console.log(mapClickPopupEvent.latlng);      
+  }
+
+  const latLngString = (latLng) => {
+    return latLng.lat.toFixed(5) + ',' + latLng.lng.toFixed(5);
+  }
+
+  const setLocation = (location, latlng) => {
+    if (location == 'from') {
+      from = latLngString(latlng);
+    } else if (location == 'to') {
+      to = latLngString(latlng);
+    }
+    if (mapClickPopup) {
+      mapClickPopup.remove();
+    }
+  }
 </script>
 <svelte:window on:resize={resizeMap} />
-
-{@debug tripPlan}
 
 <p><i>plan a journey...</i></p>
 <p>from: <input bind:value={from} label="from"/></p>
@@ -97,21 +145,25 @@
 <button on:click={getPlan}>find journey</button>
 <hr>
 {#if tripPlan}
-  {#each tripPlan.plan.itineraries[0].legs as leg}
-    <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} from {leg.from.name} to {leg.to.name}</p>
-    {#if leg.fares}
-      <select>
-        {#each leg.fares as fare}
-          <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
-        {/each}
-      </select>
-    {/if}
+  {#each tripPlan.plan.itineraries as itinerary, i}
+    <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label>
+    {#each itinerary.legs as leg}
+      <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
+      {#if leg.fares}
+        <select>
+          {#each leg.fares as fare}
+            <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
+          {/each}
+        </select>
+      {/if}
+    {/each}
   {/each}
+  
 {:else}
   <p>{tripPlanPlaceholder}</p>
 {/if}
 <div style="height:600px;width:100%;">
-  <Leaflet bind:map view={initialView} zoom={10}>
+  <Leaflet bind:map view={initialView} zoom={10} on:click={mapClick}>
     {#each mapLines as line}
       <Polyline latLngs={line.latLngs} options={{
         color: '#ffffff',
@@ -126,6 +178,15 @@
         <Popup>{line.mode}</Popup>
       </Polyline>
     {/each}
-    <Popup>test</Popup>
   </Leaflet>
+</div>
+
+<div style="display: none;"> 
+  <div bind:this={mapClickPopupContent}>
+    {#if mapClickPopupEvent}
+    <p>{mapClickPopupEvent ? latLngString(mapClickPopupEvent.latlng) : ""}</p>
+    <button on:click={() => setLocation('from', mapClickPopupEvent.latlng)}>from here</button>
+    <button on:click={() => setLocation('to', mapClickPopupEvent.latlng)}>to here</button>
+    {/if}
+  </div>
 </div>
