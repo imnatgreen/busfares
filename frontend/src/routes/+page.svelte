@@ -125,51 +125,54 @@
 </script>
 <svelte:window on:resize={resizeMap} />
 
-<p><i>plan a journey...</i></p>
-<p>from: <input bind:value={from} label="from"/></p>
-<p>to: <input bind:value={to} label="to"/></p>
-<p>date: <input type="date" bind:value={date} label="date"/> time: <input type="time" bind:value={time} label="time"/></p>
-<p>arrive by? <input type="checkbox" bind:checked={arriveBy} label="arrive by"/></p>
-<button on:click={getPlan}>find journey</button>
-<hr>
-{#if tripPlan}
-  {#each tripPlan.plan.itineraries as itinerary, i}
-    <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label>
-    {#each itinerary.legs as leg, l}
-      <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
-      {#if leg.fares}
-        <select>
-          {#each leg.fares as fare}
-            <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
-          {/each}
-        </select>
-      {/if}
-    {/each}
-  {/each}
-  
-{:else}
-  <p>{tripPlanPlaceholder}</p>
-{/if}
-<div style="height:600px;width:100%;">
-  <Leaflet bind:map view={initialView} zoom={10} on:click={mapClick}>
-    {#each mapLines as line}
-      <Polyline latLngs={line.latLngs} options={{
-        color: '#ffffff',
-        dashArray: line.mode=='WALK' ? '.1 11' : null,
-        weight: 6,
-      }}/>
-      <Polyline latLngs={line.latLngs} options={{
-        color: line.mode=='WALK' ? 'grey' : '#00839e',
-        dashArray: line.mode=='WALK' ? '.1 11' : null,
-        weight: 5,
-      }}>
-        <Popup>{line.mode}</Popup>
-      </Polyline>
-    {/each}
-  </Leaflet>
+<div class="flex flex-col md:flex-row w-full h-screen p-4 gap-4">
+  <div class="h-1/2 md:h-full md:w-1/2 overflow-y-auto flex-none p-4 rounded-lg shadow-lg">
+    <p><i>plan a journey...</i></p>
+    <p>from: <input bind:value={from} label="from"/></p>
+    <p>to: <input bind:value={to} label="to"/></p>
+    <p>date: <input type="date" bind:value={date} label="date"/> time: <input type="time" bind:value={time} label="time"/></p>
+    <p>arrive by? <input type="checkbox" bind:checked={arriveBy} label="arrive by"/></p>
+    <button on:click={getPlan}>find journey</button>
+    <hr>
+    {#if tripPlan}
+      {#each tripPlan.plan.itineraries as itinerary, i}
+        <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label>
+        {#each itinerary.legs as leg, l}
+          <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
+          {#if leg.fares}
+            <select>
+              {#each leg.fares as fare}
+                <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
+              {/each}
+            </select>
+          {/if}
+        {/each}
+      {/each}
+    {:else}
+      <p>{tripPlanPlaceholder}</p>
+    {/if}
+  </div>
+  <div class="h-1/2 md:h-full w-full md:w-1/2 md:pr-4 flex-none">
+    <Leaflet classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg shadow-lg" bind:map view={initialView} zoom={10} on:click={mapClick}>
+      {#each mapLines as line}
+        <Polyline latLngs={line.latLngs} options={{
+          color: '#ffffff',
+          dashArray: line.mode=='WALK' ? '.1 11' : null,
+          weight: 6,
+        }}/>
+        <Polyline latLngs={line.latLngs} options={{
+          color: line.mode=='WALK' ? 'grey' : '#00839e',
+          dashArray: line.mode=='WALK' ? '.1 11' : null,
+          weight: 5,
+        }}>
+          <Popup>{line.mode}</Popup>
+        </Polyline>
+      {/each}
+    </Leaflet>
+  </div>
 </div>
 
-<div style="display: none;"> 
+<div class="hidden"> 
   <div bind:this={mapClickPopupContent}>
     {#if mapClickPopupEvent}
     <p>{mapClickPopupEvent ? latLngString(mapClickPopupEvent.latlng) : ""}</p>

@@ -2,8 +2,7 @@
   import { createEventDispatcher, setContext } from 'svelte';
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
-  export let height = '100%';
-  export let width = '100%';
+  export let classes = '';
 	
 	// Must set either bounds, or view and zoom.
   export let bounds = undefined;
@@ -66,7 +65,7 @@
   }
 </style>
 
-<div style="height:{height};width:{width}" use:createLeaflet>
+<div class="{classes}" use:createLeaflet>
   {#if map}
     <slot {map} />
   {/if}
