@@ -10,7 +10,6 @@
 	import Popup from '$lib/Popup.svelte';
 
   let map;
-  // let mapContainer;
 
   let tripPlanPlaceholder = '';
   
@@ -46,11 +45,13 @@
   };
 
   let tripPlan;
+  let tripPlanFares;
   $: mapLines = [];
   let currentItinerary = 0;
 
   const getPlan = async () => {
     tripPlan = undefined;
+    tripPlanFares = undefined;
     tripPlanPlaceholder = 'getting trip plan...';
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
       fromPlace: from,
@@ -64,25 +65,12 @@
       showIntermediateStops: 'true',
       locale: 'en'
     }));
-    let json = await res.json();
-    json = await getFares(json);
-    tripPlan = json;
-    testDrawLine(tripPlan);
-    
-  }
-
-  const testDrawLine = (tripPlan) => {
-    let legs = tripPlan.plan.itineraries[0].legs;
-    mapLines = [];
-    legs.map((leg, i) => {
-      if (leg.legGeometry.points) {
-        let line = {
-          id: i,
-          latLngs: decode(leg.legGeometry.points),
-          mode: leg.mode,
-        }
-        mapLines = [...mapLines, line];
-      }
+    tripPlan = await res.json();
+    tripPlanFares = await getFares(tripPlan);
+    tripPlanFares.forEach((legs, i) => {
+      legs.forEach((fares, l) => {
+        tripPlan.plan.itineraries[i].legs[l].fares = fares;
+      })
     });
   }
 
@@ -147,7 +135,7 @@
 {#if tripPlan}
   {#each tripPlan.plan.itineraries as itinerary, i}
     <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label>
-    {#each itinerary.legs as leg}
+    {#each itinerary.legs as leg, l}
       <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
       {#if leg.fares}
         <select>

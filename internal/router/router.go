@@ -58,26 +58,42 @@ func ParseJson(data []byte) (TripPlannerResponse, error) {
 	return response, err
 }
 
-// AddFares adds a list of possible fares to each transit leg in the response
-func (r *TripPlannerResponse) AddFares(c *pgx.Conn, a *agency.Agencies) (err error) {
+// GetAllFares returns a list of fares for each leg of the TripPlannerResponse, following the same structure
+func (r *TripPlannerResponse) GetAllFares(c *pgx.Conn, a *agency.Agencies) ([][][]fares.Fare, error) {
+	var err error
+
+	// check how many legs are in each itinerary
+	itineraryLengths := []int{}
+	for _, itinerary := range r.Plan.Itineraries {
+		itineraryLengths = append(itineraryLengths, len(itinerary.Legs))
+	}
+
+	itineraryFares := make([][][]fares.Fare, len(r.Plan.Itineraries))
+
 	for i, itinerary := range r.Plan.Itineraries {
+		// create slice to add fares to
+		itineraryFares[i] = make([][]fares.Fare, itineraryLengths[i])
+
 		for l, leg := range itinerary.Legs {
 			if leg.TransitLeg {
 				agencyId := agency.AgencyId(TrimId(leg.AgencyId))
 				noc, err := a.GetNoc(agencyId)
 				if err != nil {
-					return err
+					return nil, err
 				}
-				// use i and l to update original leg
-				r.Plan.Itineraries[i].Legs[l].GetFares(c, noc)
+				legFares, err := leg.GetFares(c, noc)
+				if err != nil {
+					return nil, err
+				}
+				itineraryFares[i][l] = legFares
 			}
 		}
 	}
-	return err
+	return itineraryFares, err
 }
 
 // GetFares finds the possible fares for the given transit leg and returns them
-func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
+func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (legFares []fares.Fare, err error) {
 	// find all possible fares
 	from := fares.Naptan(TrimId(l.From.StopId))
 	to := fares.Naptan(TrimId(l.To.StopId))
@@ -92,7 +108,7 @@ func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
 	rows, err := c.Query(context.Background(), query)
 	log.Printf("query took %s", time.Since(start))
 	if err != nil {
-		return err
+		return legFares, err
 	}
 
 	start = time.Now()
@@ -146,11 +162,11 @@ func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (err error) {
 				newestFare = fare
 			}
 		}
-		l.Fares = append(l.Fares, newestFare)
+		legFares = append(legFares, newestFare)
 	}
 
-	log.Printf("found %d fares for leg %s, filtered to %d.", len(fareSlice), l.RouteShortName, len(l.Fares))
-	return err
+	log.Printf("found %d fares for leg %s, filtered to %d.", len(fareSlice), l.RouteShortName, len(legFares))
+	return legFares, err
 }
 
 // Removes the "2:" prefix present on IDs from the OTP API

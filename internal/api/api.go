@@ -37,12 +37,12 @@ func getFares(c *pgx.Conn, a *agency.Agencies) http.HandlerFunc {
 			fmt.Fprintln(w, ":/ an error occured. check logs for details.")
 			log.Print(err)
 		}
-		err = tripPlan.AddFares(c, a)
+		fares, err := tripPlan.GetAllFares(c, a)
 		if err != nil {
 			fmt.Fprintln(w, ":/ an error occured. check logs for details.")
 			log.Print(err)
 		}
-		err = json.NewEncoder(w).Encode(tripPlan)
+		err = json.NewEncoder(w).Encode(fares)
 		if err != nil {
 			fmt.Fprintln(w, ":/ an error occured. check logs for details.")
 			log.Print(err)
