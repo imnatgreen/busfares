@@ -1,3 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@supports (-webkit-hyphens:none) {
+  input::-webkit-datetime-edit {
+    line-height: 1;
+    padding: 0;
+    margin-bottom: -2px;
+  }
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: none;
+  display: none;
+  -webkit-appearance: none;
+}
