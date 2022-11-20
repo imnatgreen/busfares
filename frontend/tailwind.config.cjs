@@ -9,6 +9,9 @@ module.exports = {
       fontFamily: {
         'sans': ['Manrope', defaultTheme.fontFamily.sans],
       },
+      animation: {
+        'spin-fast': 'spin .75s linear infinite',
+      }
     },
   },
   plugins: [
