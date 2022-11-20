@@ -18,6 +18,7 @@ import (
 	"github.com/imnatgreen/busfares/frontend"
 	"github.com/imnatgreen/busfares/internal/agency"
 	"github.com/imnatgreen/busfares/internal/api"
+	"github.com/imnatgreen/busfares/internal/colours"
 	"github.com/imnatgreen/busfares/internal/fares"
 	"github.com/jackc/pgx/v5"
 )
@@ -31,6 +32,7 @@ func main() {
 	var datasetDir string
 	var dbUrl string
 	var gtfsDir string
+	var coloursPath string
 	var nocs string
 	var bodsApiKey string
 	var bodsApiBase string
@@ -40,6 +42,7 @@ func main() {
 	flag.StringVar(&datasetDir, "datasets", os.Getenv("DATASET_DIR"), "directory containing gtfs files")
 	flag.StringVar(&dbUrl, "db", os.Getenv("DATABASE_URL"), "database url")
 	flag.StringVar(&gtfsDir, "gtfs", os.Getenv("GTFS_DIR"), "directory containing gtfs files")
+	flag.StringVar(&coloursPath, "colours", os.Getenv("COLOURS"), "csv file containing line colours")
 	flag.StringVar(&nocs, "nocs", os.Getenv("NOCS"), "comma separated list of NOCS")
 	flag.StringVar(&bodsApiKey, "bods-key", os.Getenv("BODS_API_KEY"), "BODS api key")
 	flag.StringVar(&bodsApiBase, "bods-base", os.Getenv("BODS_API_BASE"), "BODS api base url")
@@ -78,9 +81,11 @@ func main() {
 	agencies, _ := loadAgencies(gtfsDir)
 	log.Printf("loaded %d agencies from disk in %s", len(agencies), time.Since(start))
 
+	cols, _ := loadColours(coloursPath)
+
 	mux := http.NewServeMux()
 
-	mux.Handle("/api/", api.Handler("/api", conn, &agencies))
+	mux.Handle("/api/", api.Handler("/api", conn, &agencies, &cols))
 
 	mux.Handle("/", frontend.SvelteKitHandler("/"))
 
@@ -165,6 +170,23 @@ func loadAgencies(gtfsDir string) (agencies agency.Agencies, err error) {
 		}
 	}
 	return agencies, nil
+}
+
+func loadColours(coloursPath string) (cols colours.Colours, err error) {
+	cols = make(colours.Colours)
+	coloursFile, err := os.Open(coloursPath)
+	if err != nil {
+		return cols, err
+	}
+	defer coloursFile.Close()
+	if err != nil {
+		return cols, err
+	}
+	err = cols.AddFromCsv(coloursFile)
+	if err != nil {
+		return cols, err
+	}
+	return cols, err
 }
 
 func devCors(handler http.Handler) http.Handler {
