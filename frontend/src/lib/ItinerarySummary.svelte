@@ -18,7 +18,7 @@
     <ItineraryLegs itinerary={itinerary}/>
   </div>
   {#if firstTransitLegIndex !== -1}
-    <span class="text-sm text-gray-500 mt-1">
+    <span class="text-sm text-gray-500 mt-1 text-left">
       Leaves at <span class="text-black">{timestampToString(itinerary.legs[firstTransitLegIndex].from.departure).time}</span> from <span class="text-black">{itinerary.legs[firstTransitLegIndex].from.name}</span></span>
   {/if}
 </div>

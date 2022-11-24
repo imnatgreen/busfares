@@ -10,7 +10,7 @@
 
 <div class="flex flex-row flex-none gap-1 mt-1">
   {#each itinerary.legs as leg, i}
-    <div class="rounded-md text-sm h-8 py-1 px-2 border-gray-300 border shadow-sm
+    <div class="rounded-md text-sm h-8 py-1 px-2 border-gray-300 border shadow-sm transition-colors duration-300
     overflow-hidden whitespace-nowrap flex flex-row items-center flex-wrap gap-1
     {leg.mode === 'WALK' ? 'bg-gray-100' : 'bg-indigo-300'}
     {leg.colour?(getContrastYIQ(leg.colour)=='black'?'text-black':'text-white'):''}"

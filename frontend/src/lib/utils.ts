@@ -29,18 +29,36 @@ export async function getLineColour(agency: string, line: string) {
     line: line
   }));
   let col = await res.text();
-  if (col[0] == '#') {
-    col = col.substring(1);
-    col = lightenDarkenColor(col, 20);
-    col = '#' + col;
-  }
+  col = lightenDarkenColor(col, 20);
   return col
 }
 
 // https://stackoverflow.com/q/5560248
 export function lightenDarkenColor(col, amt) {
-  col = parseInt(col, 16);
-  return (((col & 0x0000FF) + amt) | ((((col >> 8) & 0x00FF) + amt) << 8) | (((col >> 16) + amt) << 16)).toString(16);
+  let usePound = false;
+  if ( col[0] == "#" ) {
+      col = col.slice(1);
+      usePound = true;
+  }
+
+  const num = parseInt(col,16);
+
+  let r = (num >> 16) + amt;
+
+  if ( r > 255 ) r = 255;
+  else if  (r < 0) r = 0;
+
+  let b = ((num >> 8) & 0x00FF) + amt;
+
+  if ( b > 255 ) b = 255;
+  else if  (b < 0) b = 0;
+  
+  let g = (num & 0x0000FF) + amt;
+
+  if ( g > 255 ) g = 255;
+  else if  ( g < 0 ) g = 0;
+
+  return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);  
 }
 
 // https://stackoverflow.com/a/11868398

@@ -58,6 +58,7 @@
   let tripPlanFares;
   $: mapLines = [];
   let currentItinerary = 0;
+  let showItineraryDetail = false;
 
   const getPlan = async () => {
     tripPlan = undefined;
@@ -79,19 +80,26 @@
     }));
     tripPlan = await res.json();
     gettingPlan = false;
-    tripPlanFares = await getFares(tripPlan);
-    tripPlanFares.forEach((legs, i) => {
-      legs.forEach((fares, l) => {
-        tripPlan.plan.itineraries[i].legs[l].fares = fares;
-      })
+    tripPlanFares = getFares(tripPlan).then((res) => {
+      res.forEach((legs, i) => {
+        legs.forEach((fares, l) => {
+          tripPlan.plan.itineraries[i].legs[l].fares = fares;
+        })
+      });
     });
+    
     for (const [i, itinerary] of tripPlan.plan.itineraries.entries()) {
       for (const [l, leg] of itinerary.legs.entries()) {
         if (leg.mode === 'BUS') {
-          let col = await getLineColour(leg.agencyId.substring(2), leg.routeShortName);
-          if (col != '') {
-            tripPlan.plan.itineraries[i].legs[l].colour = col;
-          }
+          // let col = await getLineColour(leg.agencyId.substring(2), leg.routeShortName);
+          // if (col != '') {
+          //   tripPlan.plan.itineraries[i].legs[l].colour = col;
+          // } 
+          getLineColour(leg.agencyId.substring(2), leg.routeShortName).then((col) => {
+            if (col != '') {
+              tripPlan.plan.itineraries[i].legs[l].colour = col;
+            }
+          });
         }
       }
     }
@@ -306,31 +314,59 @@
         <div in:fly="{
             editSearch?{y:-100,duration:500, delay:0, opacity:1}
             :{y:25,duration:500,delay:500}
-          }" class="{editSearch ? 'opacity-100':''} transition-opacity duration-500 -z-10" >
+          }"
+          class="{editSearch ? 'opacity-100':''} transition-opacity duration-500 -z-10" >
           {#if tripPlan}
             <div in:fly="{
               editSearch?{y:-100,duration:500, delay:0, opacity:1}
               :{y:25,duration:500,delay:500}
             }">
               {#if tripPlan.plan.itineraries.length > 0}
-                {#each tripPlan.plan.itineraries as itinerary, i}
-                  <ItinerarySummary
-                    itinerary={itinerary}
-                    index={i}
-                    on:select={() => currentItinerary = i}
-                  />
-                  <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label>
-                  {#each itinerary.legs as leg, l}
-                    <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
-                    {#if leg.fares}
-                      <select>
-                        {#each leg.fares as fare}
-                          <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
+                <!-- {#key showItineraryDetail} -->
+                  <div class="grid grid-rows-[1fr] grid-cols-[1fr]">
+                    {#if showItineraryDetail}
+                      <div class="row-[1] col-[1]"
+                        in:fly="{{x:100,duration:500, delay:0}}"
+                        out:fly="{{x:100,duration:500, delay:0}}"
+                      >
+                        <button on:click={() => showItineraryDetail = false}>back</button>
+                        {#each tripPlan.plan.itineraries[currentItinerary].legs as leg, l}
+                          <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
+                          {#if leg.fares}
+                            <select>
+                              {#each leg.fares as fare}
+                                <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
+                              {/each}
+                            </select>
+                          {/if}
                         {/each}
-                      </select>
+                      </div>
+                    {:else}
+                      <div class="row-[1] col-[1]"
+                        in:fly="{{x:-100,duration:500, delay:0}}"
+                        out:fly="{{x:-100,duration:500, delay:0}}"
+                      >
+                        {#each tripPlan.plan.itineraries as itinerary, i}
+                          <button on:click={() => {
+                            currentItinerary = i;
+                            showItineraryDetail = true;
+                          }}
+                            class="mb-2 w-full"
+                          >
+                            <ItinerarySummary
+                              itinerary={itinerary}
+                              index={i}
+                              on:click={() => currentItinerary = i}
+                            />
+                          </button>
+                          
+                          <!-- <button on:click={() => showItineraryDetail = true}>details</button>
+                          <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label> -->
+                          {/each}
+                      </div>
                     {/if}
-                  {/each}
-                {/each}
+                  </div>
+                <!-- {/key} -->
               {:else}
                 <p>no itineraries found</p>
               {/if}
