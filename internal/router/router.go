@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/imnatgreen/busfares/internal/agency"
@@ -169,9 +169,11 @@ func (l *Leg) GetFares(c *pgx.Conn, n agency.Noc) (legFares []fares.Fare, err er
 	return legFares, err
 }
 
-// Removes the "2:" prefix present on IDs from the OTP API
+// Removes the "X:" prefix present on IDs from the OTP API (where X is the router ID)
 func TrimId(id string) string {
-	return strings.TrimPrefix(id, "2:")
+	re := regexp.MustCompile(`^[0-9]+:`)
+	trimmed := re.ReplaceAllString(id, "")
+	return trimmed
 }
 
 func FilterTransitLegs(response TripPlannerResponse) []Leg {
