@@ -11,6 +11,7 @@
 	import Polyline from '$lib/Polyline.svelte';
 	import Popup from '$lib/Popup.svelte';
 	import ItinerarySummary from '$lib/ItinerarySummary.svelte';
+	import Button from '$lib/Button.svelte';
 
   let map;
 
@@ -283,29 +284,23 @@
             </div>
 
             <p class="mb-1 mt-4 text-gray-500 text-sm">and, finally...</p>
-            <div class="relative mt-1">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+            <Button wrapClasses="mt-1" on:click={getPlan}>
+              <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                   <path fill-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a1.5 1.5 0 002.074 1.386l3.51-1.453 4.26 1.763a1.5 1.5 0 001.146 0l4.083-1.69A1.5 1.5 0 0018 14.748V3.873a1.5 1.5 0 00-2.073-1.386l-3.51 1.452-4.26-1.763zM7.58 5a.75.75 0 01.75.75v6.5a.75.75 0 01-1.5 0v-6.5A.75.75 0 017.58 5zm5.59 2.75a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z" clip-rule="evenodd" />
                 </svg>
-              </div>
-              <button on:click={getPlan} class="form-input pl-8 px-2 py-1 block rounded-md border-gray-300 shadow-sm
-              focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 hover:bg-indigo-50">find journey</button>
-            </div>
+              <span>find journey</span>
+            </Button>
             <hr class="my-2">
           </div>
         {:else}
           <div transition:fly="{{y:100, duration:500}}" class="row-[1] col-[1] text-gray-500 text-sm">
-            <div>journey from <span class="text-black">{from}</span> to <span class="text-black">{to}</span>, {arriveBy ? 'arriving by' : 'leaving at'} {date} {time}</div>
-            <div class="relative mt-1">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+            <div>journey from <span class="text-black">{from.properties.name}</span> to <span class="text-black">{to.properties.name}</span>, {arriveBy ? 'arriving by' : 'leaving at'} {date} {time}</div>
+            <Button on:click={openEditSearch} wrapClasses="mt-1" classes="text-sm pl-7">
+              <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                   <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
                 </svg>
-              </div>
-              <button on:click={openEditSearch} class="form-input text-sm pl-7 px-2 py-1 block rounded-md border-gray-300 shadow-sm
-              focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 hover:bg-indigo-50">edit</button>
-            </div>
+              <span>edit</span>
+            </Button>
             <hr class="my-2">
           </div>
         {/if}
@@ -329,7 +324,12 @@
                         in:fly="{{x:100,duration:500, delay:0}}"
                         out:fly="{{x:100,duration:500, delay:0}}"
                       >
-                        <button on:click={() => showItineraryDetail = false}>back</button>
+                      <Button on:click={() => showItineraryDetail = false} classes="text-sm pl-7" wrapClasses="mb-2">
+                        <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                          <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
+                        </svg>
+                        <span>back</span>
+                      </Button>
                         {#each tripPlan.plan.itineraries[currentItinerary].legs as leg, l}
                           <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
                           {#if leg.fares}
@@ -410,10 +410,8 @@
       <div class="flex flex-col gap-2 font-sans text-sm">
         <span>{mapClickPopupEvent ? latLngString(mapClickPopupEvent.latlng) : ""}</span>
         <div class="flex gap-2">
-          <button on:click={() => setLocation('from', mapClickPopupEvent.latlng)} class="form-input px-2 py-1 block text-sm rounded-md border-gray-300 shadow-sm
-            focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 hover:bg-indigo-50">from here</button>
-          <button on:click={() => setLocation('to', mapClickPopupEvent.latlng)} class="form-input px-2 py-1 block text-sm rounded-md border-gray-300 shadow-sm
-            focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 hover:bg-indigo-50">to here</button>
+          <Button on:click={() => setLocation('from', mapClickPopupEvent.latlng)} classes="text-sm">from here</Button>
+          <Button on:click={() => setLocation('to', mapClickPopupEvent.latlng)} classes="text-sm">to here</Button>
         </div>
       </div>
     {/if}
