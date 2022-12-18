@@ -8,13 +8,14 @@
   const dispatch = createEventDispatcher();
   
 	// let layerPane = pane || getContext('pane');
-  let layerGroup = getContext<() => L.LayerGroup>('layerGroup')();
+  // let layerGroup = getContext<() => L.LayerGroup>('layerGroup')();
+  let featureGroup = getContext<() => L.FeatureGroup>('featureGroup')();
 
   export let line: L.Polyline = new L.Polyline(latLngs, options)
     .on('click', (e) => dispatch('click', e))
     .on('mouseover', (e) => dispatch('mouseover', e))
     .on('mouseout', (e) => dispatch('mouseout', e))
-    .addTo(layerGroup);
+    .addTo(featureGroup);
 
   setContext('layer', () => line);
 

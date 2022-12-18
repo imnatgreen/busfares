@@ -14,8 +14,8 @@
 	import Button from '$lib/Button.svelte';
 
   let map;
+  let leaflet;
 
-  let tripPlanPlaceholder = '';
   let gettingPlan = false;
   
   const initialView = [53.71,-2.24];
@@ -125,6 +125,7 @@
         mapLines = [...mapLines, line];
       }
     });
+    leaflet.fitMapToLines();
   }
 
   let mapClickPopupContent;
@@ -385,7 +386,7 @@
     </div>
   </div>
   <div class="h-1/2 md:h-full w-full md:w-1/2 lg:w-3/5 md:pr-4 flex-none">
-    <Leaflet classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg overflow-hidden z-10 shadow-lg" bind:map view={initialView} zoom={10} on:click={mapClick}>
+    <Leaflet classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg overflow-hidden z-10 shadow-lg" bind:map bind:this={leaflet} view={initialView} zoom={10} on:click={mapClick}>
       {#each mapLines as line}
         <Polyline latLngs={line.latLngs} options={{
           color: '#ffffff',

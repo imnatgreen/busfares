@@ -16,33 +16,36 @@
 	const dispatch = createEventDispatcher();
 
 	let map;
+	let mapFeatureGroup;
   $: mapProp = map;
 	
   export const getMap = () => map;
+  export const getMapFeatureGroup = () => mapFeatureGroup;
   setContext('layerGroup', getMap);
+  setContext('featureGroup', getMapFeatureGroup);
   setContext('layer', getMap);
   setContext('map', getMap);
 	
   function createLeaflet(node) {
-    map = L.map(node)
+    map = L.map(node, {zoomControl:false})
       .addControl(L.control.scale({metric: true, imperial: false, position:'bottomright'}))
       .addControl(L.control.zoom({position:'bottomright'}))
       .on('zoom', (e) => dispatch('zoom', e))
-      .on('click', (e) => {dispatch('click', e);
-    console.log('clicked'+e.latlng.toString())});
+      .on('click', (e) => dispatch('click', e));
 		if(bounds) {
       map.fitBounds(bounds)
 		} else {
 			map.setView(view, zoom);
 		}
 
-      
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
       attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 20,
       minZoom: 0
     }).addTo(map);
+		
+		mapFeatureGroup = L.featureGroup().addTo(map);
 		
     return {
       destroy() {
@@ -52,6 +55,14 @@
     };
   }
 	
+	export function fitMapToLines() {
+		if(mapFeatureGroup) {
+			if(mapFeatureGroup.getLayers().length > 0) {
+				map.flyToBounds(mapFeatureGroup.getBounds().pad(0.15), {duration: 0.2});
+			}
+		}
+	}
+		
 	$: if(map) {
 		if(bounds) {
       map.fitBounds(bounds)
