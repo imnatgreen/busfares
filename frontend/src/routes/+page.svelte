@@ -12,6 +12,8 @@
 	import Popup from '$lib/Popup.svelte';
 	import ItinerarySummary from '$lib/ItinerarySummary.svelte';
 	import Button from '$lib/Button.svelte';
+	import ItineraryLeg from '$lib/ItineraryLeg.svelte';
+	import Tooltip from '$lib/Tooltip.svelte';
 
   let map;
   let leaflet;
@@ -120,7 +122,9 @@
           id: i,
           latLngs: decode(leg.legGeometry.points),
           mode: leg.mode,
-          colour: leg.colour ? leg.colour : '#6366F1'
+          colour: leg.colour ? leg.colour : '#6366F1',
+          routeShortName: leg.routeShortName,
+          duration: leg.duration
         }
         mapLines = [...mapLines, line];
       }
@@ -398,7 +402,13 @@
           dashArray: line.mode=='WALK' ? '.1 11' : null,
           weight: 5,
         }}>
-          <Popup>{line.mode}</Popup>
+          {#if line.mode=='BUS'}
+            {#key currentItinerary}
+              <Tooltip permanent interactive opacity={1} direction="center">
+                <ItineraryLeg leg={line} classes='font-sans' small border={false}/>
+              </Tooltip>
+            {/key}
+          {/if}
         </Polyline>
       {/each}
     </Leaflet>
