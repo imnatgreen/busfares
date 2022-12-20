@@ -38,6 +38,6 @@
 	"type": "module",
 	"dependencies": {
 		"@googlemaps/polyline-codec": "^1.0.28",
-		"leaflet": "^1.9.2"
+		"currency.js": "^2.0.4",
 	}
 }

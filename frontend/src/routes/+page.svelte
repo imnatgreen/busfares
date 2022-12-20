@@ -6,6 +6,7 @@
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
 
+  import currency from 'currency.js';
   import { decode } from '@googlemaps/polyline-codec';
 	import Leaflet from '$lib/Leaflet.svelte';
 	import Polyline from '$lib/Polyline.svelte';
@@ -62,6 +63,8 @@
   $: mapLines = [];
   let currentItinerary = 0;
   let showItineraryDetail = false;
+  let selectedFares = [];
+  let totalFares = [];
 
   const getPlan = async () => {
     tripPlan = undefined;
@@ -83,10 +86,20 @@
     }));
     tripPlan = await res.json();
     gettingPlan = false;
+    selectedFares.length = 0;
+    totalFares.length = 0;
     tripPlanFares = getFares(tripPlan).then((res) => {
       res.forEach((legs, i) => {
+        selectedFares = [...selectedFares, []];
+        totalFares = [...totalFares, undefined];
         legs.forEach((fares, l) => {
           tripPlan.plan.itineraries[i].legs[l].fares = fares;
+          if (tripPlan.plan.itineraries[i].legs[l].fares) {
+            let defaultFare = tripPlan.plan.itineraries[i].legs[l].fares.find(f => f.preassignedFareProduct.id == 'Trip@Single');
+            selectedFares[i] = [...selectedFares[i], defaultFare];
+          } else {
+            selectedFares[i] = [...selectedFares[i], undefined];
+          }
         })
       });
     });
@@ -105,6 +118,20 @@
           });
         }
       }
+    }
+  }
+
+  $: {
+    if (totalFares) {
+      selectedFares.forEach((itineraries ,i) => {
+        let total = currency(0);
+        itineraries.forEach((fare, f) => {
+          if (fare) {
+            total = total.add(fare.amount.number);
+          }
+        })
+        totalFares[i] = total.value;
+      })
     }
   }
 
@@ -338,12 +365,32 @@
                         {#each tripPlan.plan.itineraries[currentItinerary].legs as leg, l}
                           <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
                           {#if leg.fares}
-                            <select>
+                          <div class="relative mt-1">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                <path fill-rule="evenodd" d="M1 4a1 1 0 011-1h16a1 1 0 011 1v8a1 1 0 01-1 1H2a1 1 0 01-1-1V4zm12 4a3 3 0 11-6 0 3 3 0 016 0zM4 9a1 1 0 100-2 1 1 0 000 2zm13-1a1 1 0 11-2 0 1 1 0 012 0zM1.75 14.5a.75.75 0 000 1.5c4.417 0 8.693.603 12.749 1.73 1.111.309 2.251-.512 2.251-1.696v-.784a.75.75 0 00-1.5 0v.784a.272.272 0 01-.35.25A49.043 49.043 0 001.75 14.5z" clip-rule="evenodd" />
+                              </svg>                                
+                            </div>
+                            <select
+                              aria-label="Selected fare"
+                              bind:value={selectedFares[currentItinerary][l]}
+                              class="
+                                px-2 pl-7 pr-7 py-1 block rounded-md  border-gray-300 shadow-sm text-sm
+                                focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+                              "
+                            >
                               {#each leg.fares as fare}
-                                <option value={fare.salesOfferPackage.id}>{fare.preassignedFareProduct.name}: {fare.amount.currency} {fare.amount.number}</option>
+                                <option
+                                  value={fare}
+                                  selected={fare.preassignedFareProduct.id == 'Trip@Single'}
+                                >
+                                  {fare.preassignedFareProduct.name}: {new Intl.NumberFormat('en-GB',{ style: 'currency', currency: fare.amount.currency }).format(currency(fare.amount.number).value)}
+                                </option>
                               {/each}
                             </select>
+                          </div>
                           {/if}
+                        <hr class="my-2">
                         {/each}
                       </div>
                     {:else}
@@ -360,20 +407,16 @@
                           >
                             <ItinerarySummary
                               itinerary={itinerary}
-                              index={i}
+                            totalFare={totalFares[i]}
                               on:click={() => currentItinerary = i}
                             />
                           </button>
-                          
-                          <!-- <button on:click={() => showItineraryDetail = true}>details</button>
-                          <label><input type=radio bind:group={currentItinerary} name="currentItinerary" value={i}>itinerary {i+1}</label> -->
                           {/each}
                       </div>
                     {/if}
                   </div>
-                <!-- {/key} -->
               {:else}
-                <p>no itineraries found</p>
+                <p>sorry, no journeys found</p>
               {/if}
             </div>
           {:else}
@@ -383,7 +426,6 @@
                 <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"/>
               </svg>
             {/if}
-            <!-- <p>{tripPlanPlaceholder}</p> -->
           {/if}
         </div>
       {/key}
