@@ -44,10 +44,12 @@
   
   const openEditSearch = () => {
     editSearch = true;
+    showItineraryDetail = false;
   }
 
+  let leftRightTransition = false;
+
   const getFares = async (tripPlan: object) => {
-    tripPlanPlaceholder = 'getting fares...'
     const res = await fetch(apiUrl('/api/getfares'), {
       method: 'POST',
       // headers: {
@@ -72,6 +74,7 @@
     tripPlanPlaceholder = 'getting trip plan...';
     gettingPlan = true;
     editSearch = false;
+    showItineraryDetail = false;
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
       fromPlace: from,
       toPlace: to,
@@ -180,7 +183,7 @@
   }
 
   const setLocation = (location, latlng) => {
-    editSearch = true;
+    openEditSearch();
     if (location == 'from') {
       from = latLngString(latlng);
     } else if (location == 'to') {
@@ -342,6 +345,8 @@
             editSearch?{y:-100,duration:500, delay:0, opacity:1}
             :{y:25,duration:500,delay:500}
           }"
+          on:introstart="{() => leftRightTransition = false}"
+          on:introend="{() => leftRightTransition = true}"
           class="{editSearch ? 'opacity-100':''} transition-opacity duration-500 -z-10" >
           {#if tripPlan}
             <div in:fly="{
@@ -353,8 +358,8 @@
                   <div class="grid grid-rows-[1fr] grid-cols-[1fr]">
                     {#if showItineraryDetail}
                       <div class="row-[1] col-[1]"
-                        in:fly="{{x:100,duration:500, delay:0}}"
-                        out:fly="{{x:100,duration:500, delay:0}}"
+                      in:fly|local="{{x:100,duration:500, delay:0}}"
+                      out:fly|local="{{x:100,duration:500, delay:0}}"
                       >
                       <Button on:click={() => showItineraryDetail = false} classes="text-sm pl-7" wrapClasses="mb-2">
                         <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -395,8 +400,8 @@
                       </div>
                     {:else}
                       <div class="row-[1] col-[1]"
-                        in:fly="{{x:-100,duration:500, delay:0}}"
-                        out:fly="{{x:-100,duration:500, delay:0}}"
+                      in:fly|local="{{x:-100,duration:500, delay:0}}"
+                      out:fly|local="{{x:-100,duration:500, delay:0}}"
                       >
                         {#each tripPlan.plan.itineraries as itinerary, i}
                           <button on:click={() => {
