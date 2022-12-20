@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition'
-  import { otpBase, apiUrl, getLineColour } from '$lib/utils';
+  import { otpBase, apiUrl, getLineColour, latLngString, searchPlaces, placeToName } from '$lib/utils';
   
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
@@ -15,6 +15,9 @@
 	import Button from '$lib/Button.svelte';
 	import ItineraryLeg from '$lib/ItineraryLeg.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
+  import ReverseGeocodeLabel from '$lib/ReverseGeocodeLabel.svelte';
+
+  import AutoComplete from 'simple-svelte-autocomplete';
 
   let map;
   let leaflet;
@@ -30,10 +33,8 @@
 		map.setView(initialView, 10);
 	}
 
-  // generate a path-dependent if we have VITE_API_URL defined (dev mode) or nor
-
-  let from = '53.70346,-2.24653';
-  let to = '53.78967,-2.24336';
+  let from;
+  let to;
   let now = new Date();
   let datePicker;
   let timePicker;
@@ -71,13 +72,12 @@
   const getPlan = async () => {
     tripPlan = undefined;
     tripPlanFares = undefined;
-    tripPlanPlaceholder = 'getting trip plan...';
     gettingPlan = true;
     editSearch = false;
     showItineraryDetail = false;
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
-      fromPlace: from,
-      toPlace: to,
+      fromPlace: from.geometry.coordinates[1]+','+from.geometry.coordinates[0],
+      toPlace: to.geometry.coordinates[1]+','+to.geometry.coordinates[0],
       date: date,
       time: time,
       mode: 'TRANSIT,WALK',
@@ -106,7 +106,7 @@
         })
       });
     });
-    
+
     for (const [i, itinerary] of tripPlan.plan.itineraries.entries()) {
       for (const [l, leg] of itinerary.legs.entries()) {
         if (leg.mode === 'BUS') {
@@ -175,23 +175,26 @@
       .setLatLng(mapClickPopupEvent.latlng)
       .setContent(mapClickPopupContent)
       .openOn(map);
-    console.log(mapClickPopupEvent.latlng);      
   }
 
-  const latLngString = (latLng) => {
-    return latLng.lat.toFixed(5) + ',' + latLng.lng.toFixed(5);
-  }
+  let popupPlace;
 
   const setLocation = (location, latlng) => {
     openEditSearch();
     if (location == 'from') {
-      from = latLngString(latlng);
+      from = popupPlace;
     } else if (location == 'to') {
-      to = latLngString(latlng);
+      to = popupPlace;
     }
     if (mapClickPopup) {
       mapClickPopup.remove();
     }
+  }
+
+  const searchPlacesBias = async (query) => {
+    let mapCenter = map.getCenter();
+    let mapZoom = map.getZoom();
+    return await searchPlaces(query, mapCenter.lat, mapCenter.lng, mapZoom);
   }
 </script>
 <svelte:head>
@@ -227,32 +230,73 @@
             </div>
             <p class="mb-1 mt-4 text-gray-500 text-sm">okay, first, where to?</p>
             <div class="relative">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <div class="pointer-events-none z-10 absolute inset-y-0 left-0 flex items-center pl-3">
                 <span class="text-gray-500">from</span>
               </div>
-              <input
-                aria-label="Journey to location"
-                type="text"
-                class="
-                  mt-1 px-2 pl-14 py-1 block w-full rounded-md  border-gray-300 shadow-sm
+              <AutoComplete
+                bind:selectedItem={from}
+                searchFunction={searchPlacesBias}
+                cleanUserText={false}
+                delay={200}
+                labelFunction={(place) => {return place.properties.name}}
+                localFiltering={false}
+                localSorting={false}
+                placeholder="enter origin"
+                hideArrow
+                noInputStyles
+                className="w-full mt-1"
+                inputClassName="
+                  px-2 py-1 pl-14 block w-full rounded-md  border-gray-300 shadow-sm
                   focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
                 "
-                bind:value={from} name="from" label="from"
-              />
+                dropdownClassName="
+                  mt-1 w-full rounded-md border-indigo-300 shadow-sm
+                  focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              >
+                <div slot="item" let:item let:label>
+                  <span>
+                    <b>{@html label}</b>
+                    <span class="text-sm">{placeToName(item).replace(item.properties.name, '').replace(', ', '')}</span>
+                  </span>
+                </div>
+                <div slot="dropdown-header" let:nbItems let:maxItemsToShowInList>
+                  <div class="dropdown-item">Choose between those {nbItems} items</div>
+                  <hr class="dropdown-divider">
+                </div>
+              </AutoComplete>
             </div>
+            
             <div class="relative">
-              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <div class="pointer-events-none z-10 absolute inset-y-0 left-0 flex items-center pl-3">
                 <span class="text-gray-500">to</span>
               </div>
-              <input
-                aria-label="Journey to location"
-                type="text"
-                class="
-                  mt-1 px-2 pl-14 py-1 block w-full rounded-md  border-gray-300 shadow-sm
+              <AutoComplete
+                bind:selectedItem={to}
+                searchFunction={searchPlacesBias}
+                cleanUserText={false}
+                delay={200}
+                labelFunction={(place) => {return place.properties.name}}
+                localFiltering={false}
+                localSorting={false}
+                placeholder="enter destination"
+                hideArrow
+                noInputStyles
+                className="w-full mt-1"
+                inputClassName="
+                  px-2 py-1 pl-14 block w-full rounded-md  border-gray-300 shadow-sm
                   focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
                 "
-                bind:value={to} name="to" label="to"
-              />
+                dropdownClassName="
+                  mt-1 w-full rounded-md border-indigo-300 shadow-sm
+                  focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              >
+                <div slot="item" let:item let:label>
+                  <span>
+                    <b>{@html label}</b>
+                    <span class="text-sm">{placeToName(item).replace(item.properties.name, '').replace(', ', '')}</span>
+                  </span>
+                </div>
+              </AutoComplete>
             </div>
 
             <p class="mb-1 mt-4 text-gray-500 text-sm">great! now, when?</p>
@@ -321,8 +365,8 @@
             <p class="mb-1 mt-4 text-gray-500 text-sm">and, finally...</p>
             <Button wrapClasses="mt-1" on:click={getPlan}>
               <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                  <path fill-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a1.5 1.5 0 002.074 1.386l3.51-1.453 4.26 1.763a1.5 1.5 0 001.146 0l4.083-1.69A1.5 1.5 0 0018 14.748V3.873a1.5 1.5 0 00-2.073-1.386l-3.51 1.452-4.26-1.763zM7.58 5a.75.75 0 01.75.75v6.5a.75.75 0 01-1.5 0v-6.5A.75.75 0 017.58 5zm5.59 2.75a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z" clip-rule="evenodd" />
-                </svg>
+                <path fill-rule="evenodd" d="M8.157 2.175a1.5 1.5 0 00-1.147 0l-4.084 1.69A1.5 1.5 0 002 5.251v10.877a1.5 1.5 0 002.074 1.386l3.51-1.453 4.26 1.763a1.5 1.5 0 001.146 0l4.083-1.69A1.5 1.5 0 0018 14.748V3.873a1.5 1.5 0 00-2.073-1.386l-3.51 1.452-4.26-1.763zM7.58 5a.75.75 0 01.75.75v6.5a.75.75 0 01-1.5 0v-6.5A.75.75 0 017.58 5zm5.59 2.75a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z" clip-rule="evenodd" />
+              </svg>
               <span>find journey</span>
             </Button>
             <hr class="my-2">
@@ -332,8 +376,8 @@
             <div>journey from <span class="text-black">{from.properties.name}</span> to <span class="text-black">{to.properties.name}</span>, {arriveBy ? 'arriving by' : 'leaving at'} {date} {time}</div>
             <Button on:click={openEditSearch} wrapClasses="mt-1" classes="text-sm pl-7">
               <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                  <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                </svg>
+                <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+              </svg>
               <span>edit</span>
             </Button>
             <hr class="my-2">
@@ -354,22 +398,21 @@
               :{y:25,duration:500,delay:500}
             }">
               {#if tripPlan.plan.itineraries.length > 0}
-                <!-- {#key showItineraryDetail} -->
-                  <div class="grid grid-rows-[1fr] grid-cols-[1fr]">
-                    {#if showItineraryDetail}
-                      <div class="row-[1] col-[1]"
+                <div class="grid grid-rows-[1fr] grid-cols-[1fr]">
+                  {#if showItineraryDetail}
+                    <div class="row-[1] col-[1]"
                       in:fly|local="{{x:100,duration:500, delay:0}}"
                       out:fly|local="{{x:100,duration:500, delay:0}}"
-                      >
+                    >
                       <Button on:click={() => showItineraryDetail = false} classes="text-sm pl-7" wrapClasses="mb-2">
                         <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                           <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
                         </svg>
                         <span>back</span>
                       </Button>
-                        {#each tripPlan.plan.itineraries[currentItinerary].legs as leg, l}
-                          <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
-                          {#if leg.fares}
+                      {#each tripPlan.plan.itineraries[currentItinerary].legs as leg, l}
+                        <p>{new Date(leg.startTime).toLocaleString()}: {leg.mode} {leg.mode=='BUS'? '('+leg.routeShortName+' towards '+leg.headsign+')' : ''} from {leg.from.name} to {leg.to.name}</p>
+                        {#if leg.fares}
                           <div class="relative mt-1">
                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 text-gray-500">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
@@ -394,32 +437,32 @@
                               {/each}
                             </select>
                           </div>
-                          {/if}
+                        {/if}
                         <hr class="my-2">
-                        {/each}
-                      </div>
-                    {:else}
-                      <div class="row-[1] col-[1]"
+                      {/each}
+                    </div>
+                  {:else}
+                    <div class="row-[1] col-[1]"
                       in:fly|local="{{x:-100,duration:500, delay:0}}"
                       out:fly|local="{{x:-100,duration:500, delay:0}}"
-                      >
-                        {#each tripPlan.plan.itineraries as itinerary, i}
-                          <button on:click={() => {
-                            currentItinerary = i;
-                            showItineraryDetail = true;
-                          }}
-                            class="mb-2 w-full"
-                          >
-                            <ItinerarySummary
-                              itinerary={itinerary}
+                    >
+                      {#each tripPlan.plan.itineraries as itinerary, i}
+                        <button on:click={() => {
+                          currentItinerary = i;
+                          showItineraryDetail = true;
+                        }}
+                          class="mb-2 w-full"
+                        >
+                          <ItinerarySummary
+                            itinerary={itinerary}
                             totalFare={totalFares[i]}
-                              on:click={() => currentItinerary = i}
-                            />
-                          </button>
-                          {/each}
-                      </div>
-                    {/if}
-                  </div>
+                            on:click={() => currentItinerary = i}
+                          />
+                        </button>
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
               {:else}
                 <p>sorry, no journeys found</p>
               {/if}
@@ -466,7 +509,9 @@
   <div bind:this={mapClickPopupContent}>
     {#if mapClickPopupEvent}
       <div class="flex flex-col gap-2 font-sans text-sm">
-        <span>{mapClickPopupEvent ? latLngString(mapClickPopupEvent.latlng) : ""}</span>
+        {#if mapClickPopupEvent}
+          <ReverseGeocodeLabel bind:place={popupPlace} latlng={mapClickPopupEvent.latlng} />
+        {/if}
         <div class="flex gap-2">
           <Button on:click={() => setLocation('from', mapClickPopupEvent.latlng)} classes="text-sm">from here</Button>
           <Button on:click={() => setLocation('to', mapClickPopupEvent.latlng)} classes="text-sm">to here</Button>
