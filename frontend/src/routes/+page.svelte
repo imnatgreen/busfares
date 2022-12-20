@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition'
-  import { otpBase, apiUrl, getLineColour, latLngString, searchPlaces, placeToName } from '$lib/utils';
+  import { otpBase, apiUrl, getLineColour, latLngString, searchPlaces, placeToName, reverseGeocode } from '$lib/utils';
   
   import L from 'leaflet?client';
   import 'leaflet/dist/leaflet.css';
@@ -15,8 +15,7 @@
 	import Button from '$lib/Button.svelte';
 	import ItineraryLeg from '$lib/ItineraryLeg.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
-  import ReverseGeocodeLabel from '$lib/ReverseGeocodeLabel.svelte';
-
+  
   import AutoComplete from 'simple-svelte-autocomplete';
 
   let map;
@@ -166,18 +165,25 @@
   let mapClickPopupEvent;
   let mapClickPopup;
   onMount(async () => {
-    mapClickPopup = L.popup();
+    mapClickPopup = L.popup({minWidth: 200, maxWidth: 200});
   })
+  
+  let popupPlace;
+  let popupPlaceLabel;
 
-  const mapClick = (e) => {
+  const mapClick = async(e) => {
+    popupPlace = null;
     mapClickPopupEvent = e.detail;
     mapClickPopup
       .setLatLng(mapClickPopupEvent.latlng)
       .setContent(mapClickPopupContent)
       .openOn(map);
+    popupPlaceLabel = latLngString(mapClickPopupEvent.latlng);
+    popupPlace = await reverseGeocode(mapClickPopupEvent.latlng.lat, mapClickPopupEvent.latlng.lng);
+    if (popupPlace) {
+      popupPlaceLabel = placeToName(popupPlace);
+    }
   }
-
-  let popupPlace;
 
   const setLocation = (location, latlng) => {
     openEditSearch();
@@ -505,9 +511,7 @@
   <div bind:this={mapClickPopupContent}>
     {#if mapClickPopupEvent}
       <div class="flex flex-col gap-2 font-sans text-sm">
-        {#if mapClickPopupEvent}
-          <ReverseGeocodeLabel bind:place={popupPlace} latlng={mapClickPopupEvent.latlng} />
-        {/if}
+        {popupPlaceLabel}
         <div class="flex gap-2">
           <Button on:click={() => setLocation('from', mapClickPopupEvent.latlng)} classes="text-sm">from here</Button>
           <Button on:click={() => setLocation('to', mapClickPopupEvent.latlng)} classes="text-sm">to here</Button>
