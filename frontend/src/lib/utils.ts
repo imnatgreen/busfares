@@ -1,3 +1,4 @@
+// generate a path-dependent if we have VITE_API_URL defined (dev mode) or not
 export const apiUrl = (path: string) => `${import.meta.env.VITE_API_URL || ''}${path}`;
 export const otpBase = 'https://otp.nat.omg.lol/otp';
 
@@ -62,11 +63,52 @@ export function lightenDarkenColor(col, amt) {
 }
 
 // https://stackoverflow.com/a/11868398
-export function getContrastYIQ(hexcolor){
+export function getContrastYIQ(hexcolor) {
   hexcolor = hexcolor.replace("#", "");
   const r = parseInt(hexcolor.substr(0,2),16);
   const g = parseInt(hexcolor.substr(2,2),16);
   const b = parseInt(hexcolor.substr(4,2),16);
   const yiq = ((r*299)+(g*587)+(b*114))/1000;
   return (yiq >= 128) ? 'black' : 'white';
+}
+
+export function latLngString(latLng) {
+  return latLng.lat.toFixed(5) + ',' + latLng.lng.toFixed(5);
+}
+
+export async function reverseGeocode(lat, lon) {
+  const res = await fetch('https://photon.komoot.io/reverse?'+ new URLSearchParams({
+    lat: lat,
+    lon: lon
+  }));
+  const data = await res.json();
+  return data.features[0];
+}
+
+export function placeToName(place) {
+  const properties = place.properties;
+  return properties.name + (properties.osm_value!='bus_stop'?
+                        (properties.street? ', ' + properties.street : '')
+                        + (properties.city? ', ' + properties.city : '')
+                        + (properties.postcode? ', ' + properties.postcode : '')
+                      : '' )
+}
+
+export async function searchPlaces(query, lat = null, lon = null, zoom = null) {
+  const res = await fetch('https://photon.komoot.io/api/?'+ new URLSearchParams({
+    q: query,
+    bbox: '-7.58,49.96,1.69,58.64', // UK bounding box,
+    ...(lat && lon && {lat: lat, lon: lon}),
+    ...(zoom && {zoom: zoom})
+  }));
+  const data = await res.json();
+  if (data.features.length == 0) {
+    const re = /(-?\d{1,3}(?:\.\d+)?),\s*(-?\d{1,3}(?:\.\d+)?)/;
+    if (re.test(query)) {
+      const match = query.match(re);
+      const reverse = reverseGeocode(match[1], match[2]);
+      return [reverse];
+    }
+  }
+  return data.features;
 }
