@@ -18,8 +18,6 @@
   
   import AutoComplete from 'simple-svelte-autocomplete';
 
-  import AutoComplete from 'simple-svelte-autocomplete';
-
   let map;
   let leaflet;
 
