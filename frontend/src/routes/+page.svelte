@@ -75,8 +75,8 @@
     editSearch = false;
     showItineraryDetail = false;
     const res = await fetch(otpBase+'/routers/default/plan?'+ new URLSearchParams({
-      fromPlace: from.geometry.coordinates[1]+','+from.geometry.coordinates[0],
-      toPlace: to.geometry.coordinates[1]+','+to.geometry.coordinates[0],
+      fromPlace: from.properties.name+'::'+from.geometry.coordinates[1]+','+from.geometry.coordinates[0],
+      toPlace: to.properties.name+'::'+to.geometry.coordinates[1]+','+to.geometry.coordinates[0],
       date: date,
       time: time,
       mode: 'TRANSIT,WALK',
