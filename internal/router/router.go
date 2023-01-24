@@ -49,7 +49,7 @@ type LegVertex struct {
 
 type LegGeometry struct {
 	Points string `json:"points"`
-	Lenght int    `json:"length"`
+	Length int    `json:"length"`
 }
 
 func ParseJson(data []byte) (TripPlannerResponse, error) {
