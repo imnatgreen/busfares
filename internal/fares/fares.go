@@ -223,7 +223,7 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 	var userProfileRef string
 	var salesOfferPackageRef string
 	var preassignedFareProductRef string
-	var tarrifRef string
+	var tariffRef string
 	for _, d := range distanceMatrixElementIds {
 		for _, t := range f.FareTables {
 			for _, c := range t.Cells {
@@ -232,7 +232,7 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 					userProfileRef = t.UserProfileRef.Ref
 					salesOfferPackageRef = t.SalesOfferPackageRef.Ref
 					preassignedFareProductRef = t.PreassignedFareProductRef.Ref
-					tarrifRef = t.TariffRef.Ref
+					tariffRef = t.TariffRef.Ref
 					break
 				}
 			}
@@ -282,7 +282,7 @@ func (f *FareObject) GetFare(from, to Naptan) (fare Fare, err error) {
 	// get ValidBetween
 	var validBetween ValidBetween
 	for _, t := range f.Tariffs {
-		if t.Id == tarrifRef {
+		if t.Id == tariffRef {
 			validBetween = t.ValidBetween
 			break
 		}
