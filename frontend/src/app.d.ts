@@ -16,3 +16,13 @@ declare module 'leaflet?client' {
 	import all from 'leaflet';
 	export = all;
 }
+
+declare module 'leaflet.vectorgrid?client' {
+	import all from 'leaflet.vectorgrid';
+	export = all;
+}
+
+declare module 'ol-mapbox-style?client' {
+	import all from 'ol-mapbox-style';
+	export = all;
+}

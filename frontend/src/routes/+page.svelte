@@ -17,6 +17,8 @@
 	import Tooltip from '$lib/Tooltip.svelte';
   
   import AutoComplete from 'simple-svelte-autocomplete';
+	import StopsLayer from '$lib/StopsLayer.svelte';
+	import OpenLayers from '$lib/OpenLayers.svelte';
 
   let map;
   let leaflet;
@@ -482,7 +484,7 @@
     </div>
   </div>
   <div class="h-1/2 md:h-full w-full md:w-1/2 lg:w-3/5 md:pr-4 flex-none">
-    <Leaflet classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg overflow-hidden z-10 shadow-lg" bind:map bind:this={leaflet} view={initialView} zoom={10} on:click={mapClick}>
+    <!-- <Leaflet classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg overflow-hidden z-10 shadow-lg" bind:map bind:this={leaflet} view={initialView} zoom={10} on:click={mapClick}>
       {#each mapLines as line}
         <Polyline latLngs={line.latLngs} options={{
           color: '#ffffff',
@@ -503,7 +505,9 @@
           {/if}
         </Polyline>
       {/each}
-    </Leaflet>
+      <StopsLayer></StopsLayer>
+    </Leaflet> -->
+    <OpenLayers view={[-2.24,53.71]} zoom={10} classes="h-[calc(50vh-2rem)] md:h-[calc(100vh-2rem)] w-full rounded-lg overflow-hidden z-10 shadow-lg"></OpenLayers>
   </div>
 </div>
 
