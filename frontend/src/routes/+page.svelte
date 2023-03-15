@@ -213,7 +213,7 @@
     <div class="w-full h-full p-4 overflow-auto">
       <div class="grid grid-rows-[1fr] grid-cols-[1fr]">
         {#if editSearch}
-          <div transition:fly="{{y:-100, duration:500}}" class="row-[1] col-[1]">
+          <div transition:fly="{{y:-100, duration:500}}" class="row-[1] col-[1] relative">
             <h1 class="text-2xl">bus fares.</h1>
             <div class="text-gray-500 text-sm">
               <p>get bus, but cheap.</p>
@@ -232,6 +232,18 @@
                   />
                 </svg>
                 <span>by nathan :)</span>
+              </div>
+            </div>
+            <div class="absolute top-0 right-0  z-50">
+              <div class="bg-white/80 rounded-lg shadow-lg  shadow-red-300/50 hover:shadow-xl hover:shadow-red-300/75 mt-1 px-3 py-2 border border-gray-200 text-right hover:-translate-y-1 transition duration-500">
+                ⚠️ This app is in beta!
+                <br />
+                <a
+                  href="mailto:nathan@busfares.app"
+                  class="text-indigo-500 underline"
+                >
+                  Send feedback.
+                </a>
               </div>
             </div>
             <p class="mb-1 mt-4 text-gray-500 text-sm">okay, first, where to?</p>
